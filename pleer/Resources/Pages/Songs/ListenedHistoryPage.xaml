@@ -39,7 +39,8 @@
                 </Button>
             </Grid>
 
-            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Name="ListenedSongsListScroll">
+            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Name="ListenedSongsListScroll"
+                          Style="{StaticResource MinimalScrollViewer}">
                 <StackPanel Name="ListenedSongsList">
                     <TextBlock Text="Пока история пуста" 
                                Name="InfoPanel" Margin="0 20"

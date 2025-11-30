@@ -13,12 +13,13 @@
             <RowDefinition />
             <RowDefinition Height="auto"/>
         </Grid.RowDefinitions>
+
         <Border Style="{StaticResource NonFunctionalField22}">
             <TextBlock Text="Список пользователей" Padding="10 5"
                        Style="{StaticResource MainInfoPanel}"/>
         </Border>
 
-        <Grid Grid.Row="2" Margin="10 0 10 15" >
+        <Grid Grid.Row="1" Margin="10 15" >
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="auto"/>
                 <ColumnDefinition/>
@@ -31,7 +32,7 @@
                      Style="{StaticResource MainIngutField}"/>
         </Grid>
 
-        <ScrollViewer Grid.Row="2" Style="{StaticResource ScrollViewer}">
+        <ScrollViewer Grid.Row="2" Style="{StaticResource MinimalScrollViewer}">
             <StackPanel Name="UsersPanel"/>
         </ScrollViewer>
 

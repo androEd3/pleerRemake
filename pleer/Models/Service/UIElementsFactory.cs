@@ -20,17 +20,49 @@ namespace pleer.Models.Service
 
         public static Border CreateTrackCard(
             Media.Track track,
+            Action<object, MouseButtonEventArgs> clickHandler,
+            CardSize cardSize = CardSize.Small)
+        {
+            var settings = GetCardSettings(cardSize);
+            var grid = TrackGrid(track, settings);
+
+            var border = new Border
+            {
+                Style = Application.Current.TryFindResource("SimpleFunctionalCard") as Style,
+                Margin = new Thickness(0, 0, 5, 5),
+                Cursor = Cursors.Hand,
+                Child = grid,
+                Tag = track
+            };
+            border.MouseLeftButtonUp += (sender, e) => clickHandler(sender, e);
+
+            return border;
+        }
+
+        public static Border CreateTrackCard(
+            Media.Track track,
             int index,
             Action<object, MouseButtonEventArgs> clickHandler,
             CardSize cardSize = CardSize.Small)
         {
             var settings = GetCardSettings(cardSize);
-            var grid = TrackGrid(track, index, settings);
+            var grid = TrackGrid(track, settings);
+
+            var idText = new TextBlock
+            {
+                Text = (index + 1).ToString(),
+                Margin = new Thickness(15),
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center,
+                Style = (Style)Application.Current.TryFindResource("SmallInfoPanel"),
+            };
+            Grid.SetColumn(idText, 0);
+            grid.Children.Add(idText);
 
             var border = new Border
             {
                 Style = Application.Current.TryFindResource("SimpleFunctionalCard") as Style,
-                Margin = new Thickness(5, 0, 5, 5),
+                Margin = new Thickness(0, 0, 5, 5),
                 Cursor = Cursors.Hand,
                 Child = grid,
                 Tag = track
@@ -48,7 +80,18 @@ namespace pleer.Models.Service
             CardSize cardSize = CardSize.Small)
         {
             var settings = GetCardSettings(cardSize);
-            var grid = TrackGrid(track, index, settings);
+            var grid = TrackGrid(track, settings);
+
+            var idText = new TextBlock
+            {
+                Text = (index + 1).ToString(),
+                Margin = new Thickness(15),
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center,
+                Style = (Style)Application.Current.TryFindResource("SmallInfoPanel"),
+            };
+            Grid.SetColumn(idText, 0);
+            grid.Children.Add(idText);
 
             var addButton = CreateAddSongButton(listener, track);
             Grid.SetColumn(addButton, 3);
@@ -57,7 +100,7 @@ namespace pleer.Models.Service
             var border = new Border
             {
                 Style = Application.Current.TryFindResource("SimpleFunctionalCard") as Style,
-                Margin = new Thickness(5, 0, 5, 5),
+                Margin = new Thickness(0, 0, 5, 5),
                 Cursor = Cursors.Hand,
                 Child = grid,
                 Tag = track
@@ -74,30 +117,20 @@ namespace pleer.Models.Service
             return border;
         }
 
-        static Grid TrackGrid(Media.Track track, int index, CardSettings settings)
+        static Grid TrackGrid(Media.Track track, CardSettings settings)
         {
             var grid = new Grid
             {
                 Height = settings.Height,
                 ColumnDefinitions =
                 {
-                    new ColumnDefinition { Width = new GridLength(65) },
+                    new ColumnDefinition { Width = GridLength.Auto },
                     new ColumnDefinition { Width = new GridLength(settings.Height) },
                     new ColumnDefinition(),
                     new ColumnDefinition { Width = GridLength.Auto },
                     new ColumnDefinition { Width = GridLength.Auto },
                 }
             };
-
-            var idText = new TextBlock
-            {
-                Text = (index + 1).ToString(),
-                HorizontalAlignment = HorizontalAlignment.Center,
-                VerticalAlignment = VerticalAlignment.Center,
-                Style = (Style)Application.Current.TryFindResource("SmallInfoPanel"),
-            };
-            Grid.SetColumn(idText, 0);
-            grid.Children.Add(idText);
 
             var coverBorder = CreateCoverFromUrl(track.CoverUrl, settings);
             Grid.SetColumn(coverBorder, 1);
@@ -219,7 +252,7 @@ namespace pleer.Models.Service
 
             foreach (var playlist in playlists)
             {
-                var isSongInPlaylist = playlist.SongsId.Contains(track.Id);
+                var isSongInPlaylist = playlist.TracksId.Contains(track.Id);
 
                 var playlistIcon = new PackIcon
                 {
@@ -297,7 +330,7 @@ namespace pleer.Models.Service
 
             if (playlist != null)
             {
-                playlist.SongsId.Add(trackId);
+                playlist.TracksId.Add(trackId);
                 context.SaveChanges();
             }
         }
@@ -310,15 +343,13 @@ namespace pleer.Models.Service
 
             if (playlist != null)
             {
-                playlist.SongsId.Remove(trackId);
+                playlist.TracksId.Remove(trackId);
                 context.SaveChanges();
             }
         }
-
         #endregion
 
         #region Collection Cards (Playlist)
-
         public static Border CreateCollectionCard(
             Playlist playlist,
             Action<object, MouseButtonEventArgs> clickHandler,
@@ -330,7 +361,7 @@ namespace pleer.Models.Service
             var border = new Border
             {
                 Style = (Style)Application.Current.TryFindResource("SimpleFunctionalCard"),
-                Margin = new Thickness(5, 0, 5, 5),
+                Margin = new Thickness(0, 0, 5, 5),
                 Cursor = Cursors.Hand,
                 Child = playlistGrid,
                 Tag = playlist
@@ -383,11 +414,9 @@ namespace pleer.Models.Service
 
             return playlistGrid;
         }
-
         #endregion
 
         #region Album Cards
-
         public static Border CreateAlbumCard(
             Album album,
             Action<object, MouseButtonEventArgs> clickHandler,
@@ -399,10 +428,10 @@ namespace pleer.Models.Service
             var border = new Border
             {
                 Style = Application.Current.TryFindResource("SimpleFunctionalCard") as Style,
-                Margin = new Thickness(5, 0, 5, 5),
+                Margin = new Thickness(0, 0, 5, 5),
                 Cursor = Cursors.Hand,
                 Child = grid,
-                Tag = album
+                Tag = album.Id
             };
 
             border.MouseLeftButtonUp += (sender, e) => clickHandler(sender, e);
@@ -432,11 +461,9 @@ namespace pleer.Models.Service
 
             return grid;
         }
-
         #endregion
 
         #region Artist Cards
-
         public static Border CreateArtistCard(
             Artist artist,
             Action<object, MouseButtonEventArgs> clickHandler,
@@ -524,11 +551,9 @@ namespace pleer.Models.Service
                 }
             };
         }
-
         #endregion
 
         #region User Cards (Admin)
-
         public static Border CreateUserCard(
             int listenerId,
             Listener listener,
@@ -672,11 +697,9 @@ namespace pleer.Models.Service
 
             return button;
         }
-
         #endregion
 
         #region Cover/Image Helpers
-
         public static Border CreateCoverFromUrl(string imageUrl, CardSettings settings)
         {
             return new Border
@@ -692,9 +715,6 @@ namespace pleer.Models.Service
         static Border CreateCoverFromFile(string filePath, CardSettings settings)
         {
             var imagePath = filePath ?? InitializeData.GetDefaultCoverPath();
-
-            if (string.IsNullOrEmpty(filePath) || !File.Exists(filePath))
-                imagePath = InitializeData.GetDefaultCoverPath();
 
             var imageSource = DecodePhoto(imagePath, settings.ImageSize * 2);
 
@@ -785,11 +805,9 @@ namespace pleer.Models.Service
 
             return bitmap;
         }
-
         #endregion
 
         #region Info Panel
-
         public static StackPanel CreateInfoPanel(string title, string subtitle = null)
         {
             var panel = new StackPanel
@@ -802,9 +820,7 @@ namespace pleer.Models.Service
             {
                 Name = "SongTitle",
                 Text = title ?? "Unknown",
-                FontSize = 14,
-                Foreground = ColorConvert("#eeeeee"),
-                TextTrimming = TextTrimming.CharacterEllipsis
+                Style = (Style)Application.Current.TryFindResource("SongNameLowerPanel")
             };
             panel.Children.Add(titleText);
 
@@ -813,21 +829,16 @@ namespace pleer.Models.Service
                 var subtitleText = new TextBlock
                 {
                     Text = subtitle,
-                    FontSize = 12,
-                    Foreground = ColorConvert("#888888"),
-                    TextTrimming = TextTrimming.CharacterEllipsis,
-                    Margin = new Thickness(0, 2, 0, 0)
+                    Style = (Style)Application.Current.TryFindResource("ArtistNameLowerPanel")
                 };
                 panel.Children.Add(subtitleText);
             }
 
             return panel;
         }
-
         #endregion
 
         #region Utility Methods
-
         public static string FormatReleaseDate(string dateString)
         {
             if (DateTime.TryParse(dateString, out var date))

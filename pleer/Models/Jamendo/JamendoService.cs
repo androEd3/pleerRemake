@@ -66,6 +66,16 @@ namespace pleer.Models.Jamendo
             _clientId = clientId;
             _cache = cache;
             _httpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(30) };
+
+            ClearCache();
+        }
+
+        public void ClearCache()
+        {
+            if (_cache is MemoryCache memoryCache)
+            {
+                memoryCache.Compact(1.0); // Удаляет всё
+            }
         }
 
         #region Поиск
@@ -333,22 +343,52 @@ namespace pleer.Models.Jamendo
 
         public async Task<IEnumerable<Track>> GetAlbumTracksAsync(int albumId)
         {
+            if (albumId <= 0)
+            {
+                Debug.WriteLine($"albumId некорректный!");
+                return new List<Track>();
+            }
+
             var cacheKey = $"album_tracks_{albumId}";
             if (_cache.TryGetValue(cacheKey, out IEnumerable<Track> cached))
-                return cached;
+            {
+                var cachedList = cached.ToList();
+                Debug.WriteLine($"Из кэша: {cachedList.Count} треков");
+                return cachedList; 
+            }
 
             var url = BuildUrl("tracks", new()
             {
                 ["album_id"] = albumId.ToString(),
-                ["audioformat"] = "mp32",
-                ["order"] = "position"
+                ["audioformat"] = "mp32"
             });
 
-            var response = await FetchAsync<JamendoTracksResponse>(url);
-            var tracks = response?.Results?.Select(MapToTrack) ?? [];
+            try
+            {
+                var json = await _httpClient.GetStringAsync(url);
 
-            _cache.Set(cacheKey, tracks, TimeSpan.FromHours(2));
-            return tracks;
+                var response = JsonSerializer.Deserialize<JamendoTracksResponse>(json, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+
+                var tracks = response?.Results?.Select(MapToTrack).ToList() ?? new List<Track>();
+
+                Debug.WriteLine($"Маппинг завершён: {tracks.Count} треков");
+
+                if (tracks.Count > 0)
+                {
+                    _cache.Set(cacheKey, tracks, TimeSpan.FromHours(2));
+                    Debug.WriteLine($"Сохранено в кэш: {tracks.Count} треков");
+                }
+
+                return tracks; 
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Ошибка: {ex.Message}");
+                return new List<Track>();
+            }
         }
 
         public async Task<IEnumerable<Album>> GetPopularAlbumsAsync(int limit = 20)
@@ -385,11 +425,11 @@ namespace pleer.Models.Jamendo
             return
             [
                 "rock", "pop", "electronic", "hiphop", "jazz",
-            "classical", "metal", "folk", "ambient", "blues",
-            "country", "reggae", "punk", "soul", "funk",
-            "indie", "alternative", "dance", "house", "techno",
-            "trance", "dubstep", "chillout", "lounge",
-            "acoustic", "instrumental", "world", "latin"
+                "classical", "metal", "folk", "ambient", "blues",
+                "country", "reggae", "punk", "soul", "funk",
+                "indie", "alternative", "dance", "house", "techno",
+                "trance", "dubstep", "chillout", "lounge",
+                "acoustic", "instrumental", "world", "latin"
             ];
         }
         #endregion
@@ -413,15 +453,31 @@ namespace pleer.Models.Jamendo
         {
             try
             {
+                Debug.WriteLine($"🌐 Запрос: {url}");
+
                 var json = await _httpClient.GetStringAsync(url);
-                return JsonSerializer.Deserialize<T>(json, new JsonSerializerOptions
+
+                Debug.WriteLine($"📄 JSON длина: {json.Length}");
+                Debug.WriteLine($"📄 JSON начало: {json.Substring(0, Math.Min(500, json.Length))}");
+
+                var result = JsonSerializer.Deserialize<T>(json, new JsonSerializerOptions
                 {
                     PropertyNameCaseInsensitive = true
                 });
+
+                Debug.WriteLine($"✅ Десериализация успешна: {result != null}");
+
+                return result;
+            }
+            catch (JsonException ex)
+            {
+                Debug.WriteLine($"❌ JSON ошибка: {ex.Message}");
+                Debug.WriteLine($"❌ Path: {ex.Path}");
+                return null;
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Jamendo error: {ex.Message}");
+                Debug.WriteLine($"❌ Ошибка: {ex.GetType().Name} - {ex.Message}");
                 return null;
             }
         }

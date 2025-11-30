@@ -16,5 +16,5 @@ D:\VISUAL_STUDIO_PROJ\player remake\pleer\App.xaml
 247-1105006022
 Resources\Pages\AdminPages\ReportPage.xaml;Resources\Pages\AdminPages\UsersBanListPage.xaml;Resources\Pages\Collections\CollectionsListPage.xaml;Resources\Pages\Collections\OpenCollectionPage.xaml;Resources\Pages\GeneralPages\ChangePasswordPage.xaml;Resources\Pages\GeneralPages\LoginPage.xaml;Resources\Pages\GeneralPages\ProfilePage.xaml;Resources\Pages\GeneralPages\RegistrationPage.xaml;Resources\Pages\GeneralPages\UnauthorizedNoticePage.xaml;Resources\Pages\Songs\ListenedHistoryPage.xaml;Resources\Pages\Songs\SearchResultPage.xaml;Resources\Pages\UserPages\ArtistProfilePage.xaml;Resources\Pages\UserPages\HomePage.xaml;Resources\Pages\UserPages\MediaLibrary.xaml;Resources\Windows\AdminMainWindow.xaml;Resources\Windows\ListenerMainWindow.xaml;Resources\Windows\PlaylistEditWindow.xaml;
 
-False
+True
 

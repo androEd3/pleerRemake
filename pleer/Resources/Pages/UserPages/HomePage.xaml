@@ -6,7 +6,8 @@
       xmlns:local="clr-namespace:pleer.Resources.Pages.UserPages"
       mc:Ignorable="d">
 
-    <ScrollViewer VerticalScrollBarVisibility="Auto">
+    <ScrollViewer VerticalScrollBarVisibility="Auto"
+                  Style="{StaticResource MinimalScrollViewer}">
         <StackPanel>
             <StackPanel>
                 <TextBlock Text="Популярные песни" 

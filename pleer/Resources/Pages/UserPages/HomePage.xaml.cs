@@ -57,7 +57,6 @@ namespace pleer.Resources.Pages.UserPages
         }
 
         #region Популярный контент (домашняя страница)
-
         async Task LoadPopularContentAsync()
         {
             try
@@ -109,7 +108,7 @@ namespace pleer.Resources.Pages.UserPages
 
             try
             {
-                var albums = await _musicService.GetPopularAlbumsAsync(6);
+                var albums = await _musicService.GetPopularAlbumsAsync(10);
                 var albumList = albums.ToList();
 
                 if (!albumList.Any())

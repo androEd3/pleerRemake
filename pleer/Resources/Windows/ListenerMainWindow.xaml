@@ -145,7 +145,8 @@
                             <Border CornerRadius="5" Height="55" Width="55"
                                     Background="#333"/>
 
-                            <Border CornerRadius="5" Height="55" Width="55" Name="AlbumCoverBorder">
+                            <Border CornerRadius="5" Height="55" Width="55" Cursor="Hand"
+                                    Name="AlbumCoverBorder" MouseDown="AlbumCard_Click">
                                 <Border.Background>
                                     <ImageBrush Stretch="UniformToFill" x:Name="AlbumCover"/>
                                 </Border.Background>

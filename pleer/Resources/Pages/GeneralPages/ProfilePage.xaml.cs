@@ -195,7 +195,7 @@ namespace pleer.Resources.Pages.GeneralPages
             {
                 await Dispatcher.BeginInvoke(new Action(() =>
                 {
-                    var newWindow = new ListenerMainWindow(_listener);
+                    var newWindow = new ListenerMainWindow();
                     Application.Current.MainWindow = newWindow;
 
                     newWindow.Show();

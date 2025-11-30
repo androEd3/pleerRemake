@@ -37,7 +37,7 @@
                 VerticalAlignment="Center" HorizontalAlignment="Right"
                 Style="{StaticResource SimpleButton}"/>
 
-        <ScrollViewer Grid.Row="2" Style="{StaticResource ScrollViewer}">
+        <ScrollViewer Grid.Row="2" Style="{StaticResource MinimalScrollViewer}">
             <Grid Margin="5 0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="auto"/>

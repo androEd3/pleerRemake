@@ -23,7 +23,9 @@ namespace pleer.Resources.Pages.Songs
 
         public void LoadListenedHistory()
         {
-            if (_listenerMain._listeningHistory.Any())
+            var tracks = _listenerMain._listeningHistory;
+
+            if (tracks.Any())
                 InfoPanel.Visibility = Visibility.Collapsed;
             else
             {
@@ -33,11 +35,10 @@ namespace pleer.Resources.Pages.Songs
 
             ListenedSongsList.Children.Clear();
 
-            for (int i = 0; i < _listenerMain._listeningHistory.Count; i++)
+            foreach (var track in tracks)
             {
-                var track = _listenerMain._listeningHistory[i];
-
-                var card = UIElementsFactory.CreateTrackCard(track, i, _listenerMain.TrackCard_Click);
+                var card = UIElementsFactory.CreateTrackCard(track, _listenerMain.TrackCard_Click);
+                ListenedSongsList.Children.Add(card);
             }
 
             ListenedSongsListScroll.ScrollToEnd();

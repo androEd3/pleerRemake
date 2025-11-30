@@ -71,10 +71,6 @@ namespace pleer.Resources.Pages.Collections
 
             try
             {
-                Debug.WriteLine($"📀 Загрузка альбома: {_album.Title}, ID: {_album.Id}");
-                Debug.WriteLine($"🖼️ CoverUrl: {_album.CoverUrl}");
-                Debug.WriteLine($"👤 ArtistName: {_album.ArtistName}");
-
                 AlbumName.Text = _album.Title ?? "Неизвестно";
                 ArtistName.Text = _album.ArtistName ?? "Неизвестен";
                 CollectionType.Text = "Альбом";
@@ -82,12 +78,10 @@ namespace pleer.Resources.Pages.Collections
 
                 LoadCoverFromUrl(_album.CoverUrl);
 
-                Debug.WriteLine($"🎵 Загрузка треков для альбома ID: {_album.Id}");
-
                 var tracks = await _musicService.GetAlbumTracksAsync(_album.Id);
-                var trackList = tracks.ToList();
+                var trackList = _album.Tracks.ToList();
 
-                Debug.WriteLine($"✅ Загружено треков: {trackList.Count}");
+                Debug.WriteLine($"Загружено треков: {trackList.Count}");
 
                 if (trackList.Any())
                 {
@@ -99,23 +93,19 @@ namespace pleer.Resources.Pages.Collections
                 {
                     TracksCount.Text = "Треков: 0";
                     SummaryDuration.Text = "";
-                    Debug.WriteLine("⚠️ Список треков пуст!");
                 }
             }
             catch (Exception ex)
             {
                 Debug.WriteLine($"❌ Error loading album: {ex.Message}");
-                Debug.WriteLine($"❌ StackTrace: {ex.StackTrace}");
             }
         }
 
         void LoadCoverFromUrl(string url)
         {
-            Debug.WriteLine($"🖼️ Загрузка обложки: {url}");
-
             if (string.IsNullOrEmpty(url))
             {
-                Debug.WriteLine("⚠️ URL обложки пустой");
+                Debug.WriteLine("URL обложки пустой");
                 AlbumCoverCenterField.ImageSource = null;
                 return;
             }
@@ -129,11 +119,11 @@ namespace pleer.Resources.Pages.Collections
                 bitmap.EndInit();
 
                 AlbumCoverCenterField.ImageSource = bitmap;
-                Debug.WriteLine("✅ Обложка загружена");
+                Debug.WriteLine("Обложка загружена");
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"❌ Ошибка загрузки обложки: {ex.Message}");
+                Debug.WriteLine($"Ошибка загрузки обложки: {ex.Message}");
                 AlbumCoverCenterField.ImageSource = null;
             }
         }
@@ -152,7 +142,6 @@ namespace pleer.Resources.Pages.Collections
                 var playlist = _context.Playlists.Find(_playlist.Id);
                 if (playlist == null) return;
 
-                // Метаданные
                 AlbumName.Text = playlist.Title ?? "Неизвестно";
                 ArtistName.Text = _context.Listeners.Find(playlist.CreatorId)?.Name ?? "Неизвестен";
                 CollectionType.Text = "Плейлист";
@@ -164,19 +153,15 @@ namespace pleer.Resources.Pages.Collections
                     DescriptionText.Visibility = Visibility.Visible;
                 }
 
-                // Обложка плейлиста (локальная)
                 var cover = _context.PlaylistCovers.Find(playlist.CoverId);
                 if (cover != null)
                     LoadCoverFromUrl(cover.FilePath);
 
-                // Загружаем треки из Jamendo по сохранённым ID
-                var tracks = await LoadPlaylistTracksAsync(playlist.SongsId);
+                var tracks = await LoadPlaylistTracksAsync(playlist.TracksId);
 
-                // Статистика
                 TracksCount.Text = $"Треков: {tracks.Count}";
                 SummaryDuration.Text = " | Длительность: " + UIElementsFactory.FormatTotalDuration(tracks);
 
-                // Отображаем треки
                 DisplayTracks(tracks);
             }
             catch (Exception ex)
@@ -224,10 +209,7 @@ namespace pleer.Resources.Pages.Collections
                     if (track != null)
                         tracks.Add(track);
                 }
-                catch
-                {
-                    // Пропускаем недоступные треки
-                }
+                catch { }
             }
 
             return tracks;
@@ -262,6 +244,10 @@ namespace pleer.Resources.Pages.Collections
             var playlist = _context.Playlists.Find(_playlist.Id);
             if (playlist == null) return;
 
+            var link = _context.ListenerPlaylistsLinks.First(l => l.ListenerId == _listener.Id && l.PlaylistId == playlist.Id);
+            if (link == null) return;
+
+            _context.ListenerPlaylistsLinks.Remove(link);
             _context.Playlists.Remove(playlist);
             _context.SaveChanges();
 
@@ -275,7 +261,6 @@ namespace pleer.Resources.Pages.Collections
         {
             if (_album != null && _album.ArtistId > 0)
             {
-                // Загружаем артиста и переходим на его страницу
                 _ = NavigateToArtistAsync(_album.ArtistId);
             }
         }

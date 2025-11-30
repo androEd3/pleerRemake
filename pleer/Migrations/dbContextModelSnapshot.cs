@@ -22,61 +22,6 @@ namespace pleer.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("pleer.Models.Media.Album", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("CoverId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("CreatorId")
-                        .HasColumnType("int");
-
-                    b.Property<DateOnly>("ReleaseDate")
-                        .HasColumnType("date");
-
-                    b.PrimitiveCollection<string>("SongsId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)");
-
-                    b.Property<int>("TotalPlays")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CoverId");
-
-                    b.HasIndex("CreatorId");
-
-                    b.ToTable("Albums");
-                });
-
-            modelBuilder.Entity("pleer.Models.Media.AlbumCover", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("FilePath")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("AlbumCovers");
-                });
-
             modelBuilder.Entity("pleer.Models.Media.ListenerPlaylistsLink", b =>
                 {
                     b.Property<int>("ListenerId")
@@ -113,14 +58,14 @@ namespace pleer.Migrations
                         .HasMaxLength(300)
                         .HasColumnType("nvarchar(300)");
 
-                    b.PrimitiveCollection<string>("SongsId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
+
+                    b.PrimitiveCollection<string>("TracksId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -148,7 +93,7 @@ namespace pleer.Migrations
                     b.ToTable("PlaylistCovers");
                 });
 
-            modelBuilder.Entity("pleer.Models.Media.Song", b =>
+            modelBuilder.Entity("pleer.Models.Media.Track", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -156,32 +101,43 @@ namespace pleer.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("AlbumId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("FilePath")
+                    b.Property<string>("Album")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool>("Status")
-                        .HasColumnType("bit");
+                    b.Property<int>("AlbumId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Artist")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("ArtistId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("CoverUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<TimeSpan>("Duration")
+                        .HasColumnType("time");
+
+                    b.Property<int?>("PlaylistId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("StreamUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<TimeSpan>("TotalDuration")
-                        .HasColumnType("time");
-
-                    b.Property<int>("TotalPlays")
-                        .HasColumnType("int");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AlbumId");
+                    b.HasIndex("PlaylistId");
 
-                    b.ToTable("Songs");
+                    b.ToTable("Track");
                 });
 
             modelBuilder.Entity("pleer.Models.Users.Admin", b =>
@@ -203,45 +159,6 @@ namespace pleer.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Admins");
-                });
-
-            modelBuilder.Entity("pleer.Models.Users.Artist", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateOnly>("CreatedAt")
-                        .HasColumnType("date");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("PasswordHash")
-                        .IsRequired()
-                        .HasMaxLength(64)
-                        .HasColumnType("nvarchar(64)");
-
-                    b.Property<int>("ProfilePictureId")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("Status")
-                        .HasColumnType("bit");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ProfilePictureId");
-
-                    b.ToTable("Artists");
                 });
 
             modelBuilder.Entity("pleer.Models.Users.Listener", b =>
@@ -300,25 +217,6 @@ namespace pleer.Migrations
                     b.ToTable("ProfilePictures");
                 });
 
-            modelBuilder.Entity("pleer.Models.Media.Album", b =>
-                {
-                    b.HasOne("pleer.Models.Media.AlbumCover", "Cover")
-                        .WithMany()
-                        .HasForeignKey("CoverId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("pleer.Models.Users.Artist", "Creator")
-                        .WithMany("ArtistsAlbums")
-                        .HasForeignKey("CreatorId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Cover");
-
-                    b.Navigation("Creator");
-                });
-
             modelBuilder.Entity("pleer.Models.Media.ListenerPlaylistsLink", b =>
                 {
                     b.HasOne("pleer.Models.Users.Listener", "Listener")
@@ -357,26 +255,11 @@ namespace pleer.Migrations
                     b.Navigation("Creator");
                 });
 
-            modelBuilder.Entity("pleer.Models.Media.Song", b =>
+            modelBuilder.Entity("pleer.Models.Media.Track", b =>
                 {
-                    b.HasOne("pleer.Models.Media.Album", "Album")
-                        .WithMany("Songs")
-                        .HasForeignKey("AlbumId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Album");
-                });
-
-            modelBuilder.Entity("pleer.Models.Users.Artist", b =>
-                {
-                    b.HasOne("pleer.Models.Users.ProfilePicture", "ProfilePicture")
-                        .WithMany()
-                        .HasForeignKey("ProfilePictureId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("ProfilePicture");
+                    b.HasOne("pleer.Models.Media.Playlist", null)
+                        .WithMany("Tracks")
+                        .HasForeignKey("PlaylistId");
                 });
 
             modelBuilder.Entity("pleer.Models.Users.Listener", b =>
@@ -390,19 +273,11 @@ namespace pleer.Migrations
                     b.Navigation("ProfilePicture");
                 });
 
-            modelBuilder.Entity("pleer.Models.Media.Album", b =>
-                {
-                    b.Navigation("Songs");
-                });
-
             modelBuilder.Entity("pleer.Models.Media.Playlist", b =>
                 {
                     b.Navigation("ListenerPlaylists");
-                });
 
-            modelBuilder.Entity("pleer.Models.Users.Artist", b =>
-                {
-                    b.Navigation("ArtistsAlbums");
+                    b.Navigation("Tracks");
                 });
 
             modelBuilder.Entity("pleer.Models.Users.Listener", b =>

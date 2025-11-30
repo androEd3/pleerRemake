@@ -7,101 +7,97 @@
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         mc:Ignorable="d" >
 
-    <Grid>
-        <ScrollViewer VerticalScrollBarVisibility="Auto" Name="AlbumContent">
-            <StackPanel>
-                <Border Style="{StaticResource NonFunctionalField22}"
-                    Margin="0 0 5 5" Padding="5">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Name="AlbumContent">
+        <StackPanel>
+            <Border Margin="0 0 5 5" Padding="5"
+                    Style="{StaticResource NonFunctionalField22}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+
                     <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition/>
-                            <RowDefinition/>
-                            <RowDefinition/>
-                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="auto"/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
 
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="auto"/>
-                                <ColumnDefinition/>
-                            </Grid.ColumnDefinitions>
-
-                            <Border Width="150" Height="150"
-                                CornerRadius="5">
-                                <Border.Background>
-                                    <ImageBrush x:Name="AlbumCoverCenterField"
+                        <Border Width="150" Height="150" CornerRadius="5">
+                            <Border.Background>
+                                <ImageBrush x:Name="AlbumCoverCenterField"
                                             ImageSource="/Resources/ServiceImages/DefaultCover.png"
                                             Stretch="UniformToFill"/>
-                                </Border.Background>
-                            </Border>
+                            </Border.Background>
+                        </Border>
 
-                            <Grid Grid.Column="1" Margin="15 5"
+                        <Grid Grid.Column="1" Margin="15 5"
                               Name="InfoTextBlockPanel" VerticalAlignment="Bottom">
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto" MinHeight="40"/>
-                                    <RowDefinition Height="Auto"/>
-                                </Grid.RowDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto" MinHeight="40"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
 
-                                <TextBlock Name="CollectionType" 
+                            <TextBlock Name="CollectionType" 
                                        HorizontalAlignment="Left" 
                                        VerticalAlignment="Bottom"
                                        Style="{StaticResource SmallInfoPanel}"/>
 
-                                <Viewbox Grid.Row="1" MaxHeight="80"
+                            <Viewbox Grid.Row="1" MaxHeight="80"
                                      Stretch="Uniform" StretchDirection="Both"
                                      HorizontalAlignment="Left" VerticalAlignment="Bottom">
-                                    <TextBlock Name="AlbumName" TextWrapping="Wrap"
+                                <TextBlock Name="AlbumName" TextWrapping="Wrap"
                                            MaxWidth="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=Grid}}"
                                            FontSize="20" Style="{StaticResource AlbumNameCenterPanel}"/>
-                                </Viewbox>
+                            </Viewbox>
 
-                                <TextBlock Grid.Row="2" Name="ArtistName" MouseDown="ArtistName_Click"
+                            <TextBlock Grid.Row="2" Name="ArtistName" MouseDown="ArtistName_Click"
                                        HorizontalAlignment="Left" VerticalAlignment="Bottom"
                                        Style="{StaticResource ArtistNameCenterPanel}"/>
-                            </Grid>
                         </Grid>
+                    </Grid>
 
-                        <TextBlock Grid.Row="1" Margin="5" TextWrapping="Wrap"
+                    <TextBlock Grid.Row="1" Margin="5" TextWrapping="Wrap"
                                Name="DescriptionText" Visibility="Collapsed"
                                Style="{StaticResource SmallInfoPanel}">
-                        </TextBlock>
+                    </TextBlock>
 
-                        <StackPanel Grid.Row="2" Margin="0 15 5 0" 
+                    <StackPanel Grid.Row="2" Margin="0 15 5 0" 
                                 Name="PlaylistFunctionalPanel"
                                 HorizontalAlignment="Left" Orientation="Horizontal">
-                            <Button Click="EditPlaylistButton_Click" 
+                        <Button Click="EditPlaylistButton_Click" 
                                 Margin="0 0 10 0" Padding="10 5"
                                 Style="{StaticResource SimpleButton}">
-                                <StackPanel Orientation="Horizontal">
-                                    <materialDesign:PackIcon Kind="Edit" Width="30" Height="30"/>
-                                    <TextBlock Text="Редактировать" Margin="5 0"
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="Edit" Width="30" Height="30"/>
+                                <TextBlock Text="Редактировать" Margin="5 0"
                                            VerticalAlignment="Center"
                                            Style="{StaticResource SmallMainInfoPanel}"/>
-                                </StackPanel>
-                            </Button>
+                            </StackPanel>
+                        </Button>
 
-                            <Button Click="DeletePlaylistButton_Click" 
+                        <Button Click="DeletePlaylistButton_Click" 
                                 Margin="0 0 10 0" Padding="10 5"
                                 Style="{StaticResource DeleteButton}">
-                                <materialDesign:PackIcon Kind="Delete" Width="30" Height="30"/>
-                            </Button>
-                        </StackPanel>
-                    </Grid>
-                </Border>
+                            <materialDesign:PackIcon Kind="Delete" Width="30" Height="30"/>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+            </Border>
 
-                <ScrollViewer Style="{StaticResource ScrollViewer}">
-                    <StackPanel Name="SongsList"/>
-                </ScrollViewer>
+            <ScrollViewer Style="{StaticResource MinimalScrollViewer}">
+                <StackPanel Name="SongsList"/>
+            </ScrollViewer>
 
-                <StackPanel Margin="5 15">
-                    <TextBlock Style="{StaticResource SmallInfoPanel}">
+            <StackPanel Margin="5 15">
+                <TextBlock Style="{StaticResource SmallInfoPanel}">
                     <Run Name="TracksCount"/>
                     <Run Name="SummaryDuration"/>
-                    </TextBlock>
-                    <TextBlock Name="CreatonDate"
-                           Style="{StaticResource SmallInfoPanel}"/>
-                </StackPanel>
+                </TextBlock>
+                <TextBlock Name="CreatonDate" Style="{StaticResource SmallInfoPanel}"/>
             </StackPanel>
-        </ScrollViewer>
-    </Grid>
+        </StackPanel>
+    </ScrollViewer>
 </Page>

@@ -6,9 +6,7 @@
       xmlns:local="clr-namespace:pleer.Resources.Pages.Collections"
         mc:Ignorable="d">
 
-    <Grid Name="ListenerCollection">
-        <ScrollViewer Style="{StaticResource ScrollViewer}">
-            <StackPanel Name="MediaLibraryList"/>
-        </ScrollViewer>
-    </Grid>
+    <ScrollViewer Style="{StaticResource MinimalScrollViewer}">
+        <StackPanel Name="MediaLibraryList"/>
+    </ScrollViewer>
 </Page>
