@@ -1,0 +1,91 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup />
+  <ItemGroup>
+    <Compile Update="Resources\Pages\AdminPages\ReportPage.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+<<<<<<< HEAD
+=======
+    <Compile Update="Resources\Pages\AdminPages\SongsBanListPage.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+>>>>>>> a7aacb98cebe377c0fd0ad6985f6096d5605f869
+    <Compile Update="Resources\Pages\AdminPages\UsersBanListPage.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Resources\Pages\GeneralPages\UnauthorizedNoticePage.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+<<<<<<< HEAD
+    <Compile Update="Resources\Pages\Collections\OpenCollectionPage.cs">
+=======
+    <Compile Update="Resources\Pages\Collections\CreateAlbum.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Resources\Pages\Collections\OpenCollection.xaml.cs">
+>>>>>>> a7aacb98cebe377c0fd0ad6985f6096d5605f869
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Resources\Pages\GeneralPages\ChangePasswordPage.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Resources\Pages\GeneralPages\LoginPage.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Resources\Pages\GeneralPages\ProfilePage.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Resources\Pages\GeneralPages\RegistrationPage.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+<<<<<<< HEAD
+    <Compile Update="Resources\Pages\Collections\CollectionsListPage.xaml.cs">
+=======
+    <Compile Update="Resources\Pages\Collections\CollectionsList.xaml.cs">
+>>>>>>> a7aacb98cebe377c0fd0ad6985f6096d5605f869
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Resources\Pages\Songs\ListenedHistoryPage.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Resources\Pages\UserPages\ArtistProfilePage.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+<<<<<<< HEAD
+    <Compile Update="Resources\Pages\AdminPages\ArtistStatisticsPage.xaml.cs">
+=======
+    <Compile Update="Resources\Pages\UserPages\ArtistStatisticsPage.xaml.cs">
+>>>>>>> a7aacb98cebe377c0fd0ad6985f6096d5605f869
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Resources\Pages\UserPages\HomePage.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Resources\Pages\UserPages\MediaLibrary.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+<<<<<<< HEAD
+    <Compile Update="Resources\Pages\Songs\SearchResultPage.xaml.cs">
+=======
+    <Compile Update="Resources\Pages\Songs\SearchResult.xaml.cs">
+>>>>>>> a7aacb98cebe377c0fd0ad6985f6096d5605f869
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Resources\Windows\AdminMainWindow.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+<<<<<<< HEAD
+=======
+    <Compile Update="Resources\Windows\ArtistMainWindow.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+>>>>>>> a7aacb98cebe377c0fd0ad6985f6096d5605f869
+    <Compile Update="Resources\Windows\ListenerMainWindow.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Resources\Windows\PlaylistEditWindow.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+  </ItemGroup>
+</Project>

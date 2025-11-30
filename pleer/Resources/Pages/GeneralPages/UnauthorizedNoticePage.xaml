@@ -1,0 +1,22 @@
+﻿<Page x:Class="pleer.Resources.Pages.GeneralPages.UnauthorizedNoticePage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:pleer.Resources.Pages.GeneralPages"
+        mc:Ignorable="d">
+
+    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+        <TextBlock TextWrapping="Wrap" 
+                   HorizontalAlignment="Center"
+                   Text="Необходимо войти в профиль"
+                   Style="{StaticResource SmallMainInfoPanel}"/>
+
+        <TextBlock Name="TurnToAuthorization" TextWrapping="Wrap"
+                   HorizontalAlignment="Center"
+                   Text="Нажмити для авторизации"
+                   Cursor="Hand" Margin="0 10"
+                   MouseUp="TurnToAuthorization_Click"
+                   Style="{StaticResource FunctionalSmallInfoPanel}"/>
+    </StackPanel>
+</Page>

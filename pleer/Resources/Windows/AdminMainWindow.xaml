@@ -1,0 +1,83 @@
+﻿<Window x:Class="pleer.Resources.Windows.AdminMainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:pleer.Resources.Windows"
+            xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+            mc:Ignorable="d" WindowStartupLocation="CenterScreen"
+            Style="{StaticResource MainWindow}" >
+
+    <Grid>
+        <Grid Margin="2.5">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="75"/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+
+            <StackPanel Orientation="Horizontal" Margin="10 0"
+                        VerticalAlignment="Center">
+                <Grid>
+                    <ToggleButton Name="MenuToggleButton"
+                                  ClickMode="Press"
+                                  Style="{StaticResource MenuToggleButton}">
+                        <materialDesign:PackIcon Kind="Menu" Width="50" Height="50"/>
+                    </ToggleButton>
+
+                    <Popup Name="MenuPopup"
+                           PlacementTarget="{Binding ElementName=MenuToggleButton}"
+                           Placement="Bottom" StaysOpen="False"
+                           IsOpen="{Binding IsChecked, ElementName=MenuToggleButton, Mode=TwoWay}">
+
+                        <Border CornerRadius="5" Padding="0 5"
+                                BorderThickness="1" BorderBrush="#333"
+                                Style="{StaticResource NonFunctionalField2c}">
+                            <StackPanel>
+                                <Button Content="Войти как слушатель" 
+                                        Click="LoginAsListenerButton_Click"
+                                        Style="{StaticResource MenuButton}"/>
+                            </StackPanel>
+                        </Border>
+                    </Popup>
+                </Grid>
+
+                <Button Click="BackPageButton_Click" Name="BackButton" Margin="15 0 0 0"
+                        Style="{StaticResource BaseFunctionButton}">
+                    <materialDesign:PackIcon Kind="ChevronLeft"
+                                             Width="50" Height="50"/>
+                </Button>
+                <Button Click="ForwardPageButton_Click" Name="ForwardButton"
+                        Style="{StaticResource BaseFunctionButton}">
+                    <materialDesign:PackIcon Kind="ChevronRight" 
+                                             Width="50" Height="50"/>
+                </Button>
+            </StackPanel>
+
+            <Grid Grid.Row="1" Margin="5" Name="MainGrid">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="300"/>
+                    <ColumnDefinition Width="0.8*"/>
+                </Grid.ColumnDefinitions>
+
+                <Border Style="{StaticResource NonFunctionalField22}">
+                    <StackPanel Name="ArtistFunctionsList" Margin="5 0">
+                        <Button Margin="0 5" Click="UsersListButton_Click"
+                                Style="{StaticResource SimpleButtonV2}">
+                            <TextBlock TextWrapping="Wrap" TextAlignment="Center"
+                                       Text="Список и блокировка пользователей"/>
+                        </Button>
+
+                        <Button Margin="0 5" Content="Отчеты" Click="ReportsButton_Click"
+                                Style="{StaticResource SimpleButtonV2}"/>
+                    </StackPanel>
+                </Border>
+
+                <Frame Grid.Column="1" Name="OperationField" 
+                       NavigationUIVisibility="Hidden" Navigated="OperationField_Navigated"/>
+            </Grid>
+        </Grid>
+
+        <Frame Name="FullWindow" VerticalAlignment="Center" HorizontalAlignment="Center"
+               NavigationUIVisibility="Hidden" Navigated="OperationField_Navigated"/>
+    </Grid>
+</Window>

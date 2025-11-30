@@ -1,0 +1,20 @@
+﻿pleer
+1.0.0.0
+
+winexe
+C#
+.cs
+D:\VISUAL_STUDIO_PROJ\player remake\pleer\obj\Debug\net8.0-windows7.0\
+pleer
+none
+false
+TRACE;DEBUG;NET;NET8_0;NETCOREAPP;WINDOWS;WINDOWS7_0;NET5_0_OR_GREATER;NET6_0_OR_GREATER;NET7_0_OR_GREATER;NET8_0_OR_GREATER;NETCOREAPP3_0_OR_GREATER;NETCOREAPP3_1_OR_GREATER;WINDOWS7_0_OR_GREATER
+D:\VISUAL_STUDIO_PROJ\player remake\pleer\App.xaml
+171545735767
+
+59-831407931
+247-1105006022
+Resources\Pages\AdminPages\ReportPage.xaml;Resources\Pages\AdminPages\UsersBanListPage.xaml;Resources\Pages\Collections\CollectionsListPage.xaml;Resources\Pages\Collections\OpenCollectionPage.xaml;Resources\Pages\GeneralPages\ChangePasswordPage.xaml;Resources\Pages\GeneralPages\LoginPage.xaml;Resources\Pages\GeneralPages\ProfilePage.xaml;Resources\Pages\GeneralPages\RegistrationPage.xaml;Resources\Pages\GeneralPages\UnauthorizedNoticePage.xaml;Resources\Pages\Songs\ListenedHistoryPage.xaml;Resources\Pages\Songs\SearchResultPage.xaml;Resources\Pages\UserPages\ArtistProfilePage.xaml;Resources\Pages\UserPages\HomePage.xaml;Resources\Pages\UserPages\MediaLibrary.xaml;Resources\Windows\AdminMainWindow.xaml;Resources\Windows\ListenerMainWindow.xaml;Resources\Windows\PlaylistEditWindow.xaml;
+
+False
+
