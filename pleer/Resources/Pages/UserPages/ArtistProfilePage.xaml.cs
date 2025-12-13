@@ -1,4 +1,4 @@
-﻿using pleer.Models.Jamendo;
+﻿using pleer.Models.IA;
 using pleer.Models.Service;
 using pleer.Models.Users;
 using pleer.Resources.Windows;
@@ -51,14 +51,14 @@ namespace pleer.Resources.Pages.UserPages
 
             try
             {
-                var artist = await _musicService.GetArtistAsync(_artist.Id);
+                var artist = await _musicService.GetArtistAsync(_artist.Name);
                 if (artist != null)
                     _artist = artist;
 
                 // Метаданные
                 ArtistName.Text = _artist.Name;
 
-                LoadPictureFromUrl(_artist.ImageUrl);
+                LoadPictureFromUrl(_artist.ProfileImageUrl);
 
                 // контент артиста
                 ArtistsContentField.Navigate(

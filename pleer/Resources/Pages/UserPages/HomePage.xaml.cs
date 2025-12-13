@@ -1,4 +1,4 @@
-using pleer.Models.Jamendo;
+using pleer.Models.IA;
 using pleer.Models.Service;
 using pleer.Models.Users;
 using pleer.Resources.Windows;
@@ -152,7 +152,7 @@ namespace pleer.Resources.Pages.UserPages
 
             try
             {
-                var tracks = await _musicService.GetArtistTracksAsync(_artist.Id);
+                var tracks = await _musicService.GetArtistTracksAsync(_artist.Name);
                 var trackList = tracks.Take(10).ToList();
 
                 if (!trackList.Any())
@@ -185,7 +185,7 @@ namespace pleer.Resources.Pages.UserPages
 
             try
             {
-                var albums = await _musicService.GetArtistAlbumsAsync(_artist.Id);
+                var albums = await _musicService.GetArtistAlbumsAsync(_artist.Name);
                 var albumList = albums.ToList();
 
                 if (!albumList.Any())

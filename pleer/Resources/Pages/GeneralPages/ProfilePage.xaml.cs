@@ -1,5 +1,4 @@
 ﻿using pleer.Models.DatabaseContext;
-using pleer.Models.Jamendo;
 using pleer.Models.Service;
 using pleer.Models.Users;
 using pleer.Resources.Windows;

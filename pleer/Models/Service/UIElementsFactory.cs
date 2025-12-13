@@ -17,7 +17,6 @@ namespace pleer.Models.Service
     public class UIElementsFactory()
     {
         #region Track Cards
-
         public static Border CreateTrackCard(
             Media.Track track,
             Action<object, MouseButtonEventArgs> clickHandler,
@@ -142,7 +141,7 @@ namespace pleer.Models.Service
 
             var durationText = new TextBlock
             {
-                Text = track.DurationFormatted,
+                Text = track.Duration.ToString(),
                 TextAlignment = TextAlignment.Center,
                 VerticalAlignment = VerticalAlignment.Center,
                 Margin = new Thickness(10, 0, 15, 0),
@@ -153,11 +152,9 @@ namespace pleer.Models.Service
 
             return grid;
         }
-
         #endregion
 
         #region Add Song Button
-
         public static Grid CreateAddSongButton(
             Listener listener,
             Media.Track track,
@@ -322,7 +319,7 @@ namespace pleer.Models.Service
             }
         }
 
-        static void AddSongToPlaylist(int playlistId, int trackId)
+        static void AddSongToPlaylist(int playlistId, string trackId)
         {
             using var context = new DBContext();
 
@@ -335,7 +332,7 @@ namespace pleer.Models.Service
             }
         }
 
-        static void DeleteSongFromPlaylist(int playlistId, int trackId)
+        static void DeleteSongFromPlaylist(int playlistId, string trackId)
         {
             using var context = new DBContext();
 
@@ -431,7 +428,7 @@ namespace pleer.Models.Service
                 Margin = new Thickness(0, 0, 5, 5),
                 Cursor = Cursors.Hand,
                 Child = grid,
-                Tag = album.Id
+                Tag = album
             };
 
             border.MouseLeftButtonUp += (sender, e) => clickHandler(sender, e);
@@ -455,7 +452,7 @@ namespace pleer.Models.Service
             Grid.SetColumn(cover, 0);
             grid.Children.Add(cover);
 
-            var infoPanel = CreateInfoPanel(album.Title, $"Альбом • {album.ArtistName}");
+            var infoPanel = CreateInfoPanel(album.Title, $"Альбом • {album.Artist}");
             Grid.SetColumn(infoPanel, 1);
             grid.Children.Add(infoPanel);
 
@@ -498,7 +495,7 @@ namespace pleer.Models.Service
                 }
             };
 
-            var imageEllipse = CreateArtistPictureFromUrl(artist.ImageUrl, settings);
+            var imageEllipse = CreateArtistPictureFromUrl(artist.ProfileImageUrl, settings);
             Grid.SetColumn(imageEllipse, 0);
             grid.Children.Add(imageEllipse);
 
@@ -820,7 +817,7 @@ namespace pleer.Models.Service
             {
                 Name = "SongTitle",
                 Text = title ?? "Unknown",
-                Style = (Style)Application.Current.TryFindResource("SongNameLowerPanel")
+                Style = (Style)Application.Current.TryFindResource("SmallMainInfoPanel")
             };
             panel.Children.Add(titleText);
 
@@ -829,7 +826,7 @@ namespace pleer.Models.Service
                 var subtitleText = new TextBlock
                 {
                     Text = subtitle,
-                    Style = (Style)Application.Current.TryFindResource("ArtistNameLowerPanel")
+                    Style = (Style)Application.Current.TryFindResource("SmallInfoPanel")
                 };
                 panel.Children.Add(subtitleText);
             }
@@ -850,7 +847,7 @@ namespace pleer.Models.Service
         {
             var total = TimeSpan.Zero;
             foreach (var track in tracks)
-                total += track.Duration;
+                total += (TimeSpan)track.Duration;
 
             return total.TotalHours >= 1
                 ? total.ToString(@"h\:mm\:ss")

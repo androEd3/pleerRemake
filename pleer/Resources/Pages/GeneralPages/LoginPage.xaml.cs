@@ -29,9 +29,16 @@ namespace pleer.Resources.Pages.GeneralPages
 
             _listenerMain = main;
 
-            _listener = _context.Listeners.First();
-            OpenNewWindow(_listener);
+            Loaded += async (s, e) => await LoadListenerLoginPage();
+        }
 
+        async Task LoadListenerLoginPage()
+        {
+            if (_context.Listeners.Any())
+            {
+                _listener = _context.Listeners.First();
+                //await OpenNewWindow(_listener);
+            }
             UserInactiveGrid();
         }
 
@@ -41,8 +48,16 @@ namespace pleer.Resources.Pages.GeneralPages
 
             _adminMain = main;
 
-            _admin = _context.Admins.First();
-            OpenNewWindow(_admin);
+            Loaded += async (s, e) => await LoadAdminLoginPage();
+        }
+
+        async Task LoadAdminLoginPage()
+        {
+            if (_context.Admins.Any())
+            {
+                _admin = _context.Admins.First();
+                await OpenNewWindow(_admin);
+            }
 
             CloseFullWindowFrameButton.Visibility = Visibility.Collapsed;
             TurnToRegistration.Visibility = Visibility.Collapsed;

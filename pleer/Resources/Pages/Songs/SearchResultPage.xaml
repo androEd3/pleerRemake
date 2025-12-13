@@ -39,7 +39,7 @@
                               SelectionChanged="GenreComboBox_SelectionChanged" 
                               Style="{StaticResource SimpleComboBox}"/>
 
-                    <Button Content="Сбросить" Click="ClearGenreButton_Click"
+                    <Button Content="X" Click="ClearGenreButton_Click"
                             Margin="10 0" Padding="10 5"
                             Style="{StaticResource SimpleButton}"/>
                 </StackPanel>

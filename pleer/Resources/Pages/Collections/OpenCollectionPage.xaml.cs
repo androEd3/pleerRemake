@@ -1,5 +1,5 @@
 ﻿using pleer.Models.DatabaseContext;
-using pleer.Models.Jamendo;
+using pleer.Models.IA;
 using pleer.Models.Media;
 using pleer.Models.Service;
 using pleer.Models.Users;
@@ -72,7 +72,7 @@ namespace pleer.Resources.Pages.Collections
             try
             {
                 AlbumName.Text = _album.Title ?? "Неизвестно";
-                ArtistName.Text = _album.ArtistName ?? "Неизвестен";
+                ArtistName.Text = _album.Artist ?? "Неизвестен";
                 CollectionType.Text = "Альбом";
                 CreatonDate.Text = UIElementsFactory.FormatReleaseDate(_album.ReleaseDate);
 
@@ -80,8 +80,6 @@ namespace pleer.Resources.Pages.Collections
 
                 var tracks = await _musicService.GetAlbumTracksAsync(_album.Id);
                 var trackList = _album.Tracks.ToList();
-
-                Debug.WriteLine($"Загружено треков: {trackList.Count}");
 
                 if (trackList.Any())
                 {
@@ -97,7 +95,7 @@ namespace pleer.Resources.Pages.Collections
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"❌ Error loading album: {ex.Message}");
+                Debug.WriteLine($"Error loading album: {ex.Message}");
             }
         }
 
@@ -197,7 +195,7 @@ namespace pleer.Resources.Pages.Collections
             Debug.WriteLine($"✅ Добавлено карточек: {SongsList.Children.Count}");
         }
 
-        async Task<List<Track>> LoadPlaylistTracksAsync(List<int> trackIds)
+        async Task<List<Track>> LoadPlaylistTracksAsync(List<string> trackIds)
         {
             var tracks = new List<Track>();
 
@@ -259,17 +257,17 @@ namespace pleer.Resources.Pages.Collections
 
         private void ArtistName_Click(object sender, MouseButtonEventArgs e)
         {
-            if (_album != null && _album.ArtistId > 0)
+            if (_album != null && _album.Artist != null)
             {
-                _ = NavigateToArtistAsync(_album.ArtistId);
+                _ = NavigateToArtistAsync(_album.Artist);
             }
         }
 
-        async Task NavigateToArtistAsync(int artistId)
+        async Task NavigateToArtistAsync(string artistName)
         {
             try
             {
-                var artist = await _musicService.GetArtistAsync(artistId);
+                var artist = await _musicService.GetArtistAsync(artistName);
                 if (artist != null)
                 {
                     _listenerMain.CenterField.Navigate(

@@ -75,7 +75,6 @@ namespace pleer.Resources.Pages.GeneralPages
                         return;
                     }
                     await ChangeListenerPassword(listener, newPassword);
-                    ChangeListenerPassword(listener, newPassword);
                 }
             }
             catch (Exception ex)

@@ -55,7 +55,7 @@
 
                             <TextBlock Grid.Row="2" Name="ArtistName" MouseDown="ArtistName_Click"
                                        HorizontalAlignment="Left" VerticalAlignment="Bottom"
-                                       Style="{StaticResource ArtistNameCenterPanel}"/>
+                                       Style="{StaticResource ArtistNameLowerPanel}"/>
                         </Grid>
                     </Grid>
 

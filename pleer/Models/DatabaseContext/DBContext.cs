@@ -26,7 +26,6 @@ namespace pleer.Models.DatabaseContext
             if (!optionsBuilder.IsConfigured)
             {
                 optionsBuilder.UseSqlServer("Server=ROONIN-COMPUTAH\\SQLEXPRESS;Database=pleerRemake;Integrated Security=SSPI;Trust Server Certificate=True");
-                //optionsBuilder.UseSqlServer("Server=ROONIN-COMPUTAH\\SQLEXPRESS;Database=pleer;Integrated Security=SSPI;Trust Server Certificate=True");
             }
         }
 

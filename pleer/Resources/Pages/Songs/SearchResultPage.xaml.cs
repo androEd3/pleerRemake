@@ -1,4 +1,4 @@
-﻿using pleer.Models.Jamendo;
+﻿using pleer.Models.IA;
 using pleer.Models.Media;
 using pleer.Models.Service;
 using pleer.Models.Users;
@@ -56,7 +56,7 @@ namespace pleer.Resources.Pages.Songs
                 var genres = _musicService.GetAvailableGenres();
 
                 var genresList = new List<string> { "Все жанры" };
-                genresList.AddRange(genres.Select(g => CapitalizeFirst(g)));
+                genresList.AddRange(genres.Result.Select(CapitalizeFirst));
 
                 GenreComboBox.ItemsSource = genresList;
                 GenreComboBox.SelectedIndex = 0;
@@ -130,19 +130,18 @@ namespace pleer.Resources.Pages.Songs
                     var tracks = await _musicService.GetTracksByGenreAsync(_selectedGenre.ToLower(), 100);
 
                     var albums = tracks
-                        .Where(t => t.AlbumId > 0)
-                        .GroupBy(t => t.AlbumId)
+                        .Where(t => t.Album != null)
+                        .GroupBy(t => t.Album)
                         .Select(g => new Album
                         {
                             Id = g.Key,
                             Title = g.First().Album,
-                            ArtistName = g.First().Artist,
-                            ArtistId = g.First().ArtistId,
+                            Artist = g.First().Artist,
                             CoverUrl = g.First().CoverUrl
                         })
                         .Where(a =>
                             a.Title.Contains(_searchQuery, StringComparison.OrdinalIgnoreCase) ||
-                            a.ArtistName.Contains(_searchQuery, StringComparison.OrdinalIgnoreCase))
+                            a.Artist.Contains(_searchQuery, StringComparison.OrdinalIgnoreCase))
                         .ToList();
 
                     results = new SearchResult { Albums = albums };
@@ -175,11 +174,10 @@ namespace pleer.Resources.Pages.Songs
                     var tracks = await _musicService.GetTracksByGenreAsync(_selectedGenre.ToLower(), 100);
 
                     var artists = tracks
-                        .Where(t => t.ArtistId > 0)
-                        .GroupBy(t => t.ArtistId)
+                        .Where(t => t.Artist != null)
+                        .GroupBy(t => t.Artist)
                         .Select(g => new Artist
                         {
-                            Id = g.Key,
                             Name = g.First().Artist
                         })
                         .Where(a =>
@@ -191,7 +189,7 @@ namespace pleer.Resources.Pages.Songs
                     {
                         try
                         {
-                            var fullArtist = await _musicService.GetArtistAsync(artist.Id);
+                            var fullArtist = await _musicService.GetArtistAsync(artist.Name);
                             if (fullArtist != null)
                                 fullArtists.Add(fullArtist);
                         }

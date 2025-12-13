@@ -23,8 +23,8 @@ namespace pleer.Models.Media
         [Required]
         public DateOnly CreatedAt { get; set; }
 
-        public List<int> TracksId { get; set; } = [];
-        public List<Track> Tracks { get; set; } = [];
+        public List<string> TracksId { get; set; } = [];
+        virtual public List<Track> Tracks { get; set; } = [];
 
         //навигация
         public virtual ICollection<ListenerPlaylistsLink> ListenerPlaylists { get; set; } = [];

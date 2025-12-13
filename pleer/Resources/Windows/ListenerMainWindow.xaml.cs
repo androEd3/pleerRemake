@@ -1,8 +1,7 @@
 ﻿using MaterialDesignThemes.Wpf;
-using Microsoft.Extensions.Caching.Memory;
 using NAudio.Wave;
 using pleer.Models.DatabaseContext;
-using pleer.Models.Jamendo;
+using pleer.Models.IA;
 using pleer.Models.Media;
 using pleer.Models.Service;
 using pleer.Models.Users;
@@ -29,18 +28,17 @@ namespace pleer.Resources.Windows
         ListenedHistoryPage _listenedHistoryPage;
 
         IWavePlayer _wavePlayer;
-        WaveStream _audioStream;
+        WaveStream _audioStream; // MediaFoundationReader
         public IMusicService _musicService;
 
         Track _selectedTrack;
-        AudioFileReader _audioFile;
 
         Border _selectedCard;
         Playlist _currentPlaylist;
         public Album _currentAlbum;
         public Artist _currentArtist;
 
-        public List<Track> _listeningHistory = [];
+        public List<Track> _listeningHistory = new();
         int _songSerialNumber;
 
         bool _isDraggingMediaSlider;
@@ -78,27 +76,14 @@ namespace pleer.Resources.Windows
         {
             if (App.Services != null)
             {
-                _musicService = App.Services.GetService(typeof(IMusicService)) as IMusicService;
+                _musicService = (IMusicService)App.Services.GetService(typeof(IMusicService));
                 Debug.WriteLine($"Сервис из DI: {_musicService != null}");
             }
-
-            if (_musicService == null)
-            {
-                Debug.WriteLine("DI не сработал, создаю напрямую");
-                var cache = new MemoryCache(new MemoryCacheOptions());
-                _musicService = new JamendoService("99575e94", cache);
-            }
-
-            Debug.WriteLine($"MusicService готов: {_musicService != null}");
         }
 
         void InitializeNAudio()
         {
-            _wavePlayer = new WaveOutEvent();
-
-            _wavePlayer.PlaybackStopped += WavePlayer_PlaybackStopped;
             InitializeMusicService();
-
             InitializeProgressUpdates();
         }
 
@@ -175,7 +160,6 @@ namespace pleer.Resources.Windows
                 return;
             }
 
-            // Проверяем, действительно ли трек закончился
             if (_audioStream != null &&
                 _audioStream.CurrentTime >= _audioStream.TotalTime - TimeSpan.FromSeconds(0.5))
             {
@@ -184,7 +168,7 @@ namespace pleer.Resources.Windows
         }
 
         #region === ВОСПРОИЗВЕДЕНИЕ ===
-        void SelectTrack(Track track)
+        async void SelectTrack(Track track)
         {
             try
             {
@@ -194,13 +178,28 @@ namespace pleer.Resources.Windows
 
                 string streamUrl = track.StreamUrl;
 
-                if (string.IsNullOrEmpty(streamUrl))
+                if (string.IsNullOrWhiteSpace(streamUrl) && _musicService != null)
                 {
-                    MessageBox.Show("Не удалось получить ссылку на трек", "Ошибка");
+                    streamUrl = await _musicService.GetStreamUrlAsync(track);
+                }
+
+                Debug.WriteLine($"🔗 URL: {streamUrl}");
+
+                if (string.IsNullOrWhiteSpace(streamUrl))
+                {
+                    MessageBox.Show("Не удалось получить ссылку на поток", "Ошибка");
                     return;
                 }
 
+                // новый считыватель потока и плеер
+                _audioStream?.Dispose();
                 _audioStream = new MediaFoundationReader(streamUrl);
+
+                if (_wavePlayer != null)
+                {
+                    _wavePlayer.PlaybackStopped -= WavePlayer_PlaybackStopped;
+                    _wavePlayer.Dispose();
+                }
 
                 _wavePlayer = new WaveOutEvent();
                 _wavePlayer.PlaybackStopped += WavePlayer_PlaybackStopped;
@@ -208,24 +207,22 @@ namespace pleer.Resources.Windows
                 _wavePlayer.Volume = (float)VolumeSlider.Value;
                 _wavePlayer.Play();
 
+                totalMediaTime.Text = _audioStream.TotalTime.ToString(@"mm\:ss");
+                PositionSlider.Maximum = _audioStream.TotalTime.TotalSeconds;
+
                 _playerState = PlayerState.Playing;
 
-                LoadTrackMetadata();
-
-                if (_listeningHistory.Count == 0)
-                    AddTrackToHistory(track);
-                else if (_listeningHistory.Last().Id != track.Id)
-                    AddTrackToHistory(track);
+                AddTrackToHistory(track);
+                await LoadTrackMetadata();
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Ошибка воспроизведения: {ex.Message}");
-                MessageBox.Show($"Не удалось воспроизвести трек:\n{track.Title}",
-                    "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                Debug.WriteLine($"Ошибка: {ex}");
+                MessageBox.Show($"Ошибка воспроизведения: {ex.Message}");
             }
         }
 
-        void LoadTrackMetadata()
+        async Task LoadTrackMetadata()
         {
             if (_audioStream == null || _selectedTrack == null)
                 return;
@@ -238,20 +235,20 @@ namespace pleer.Resources.Windows
             PositionSlider.Maximum = _audioStream.TotalTime.TotalSeconds;
 
             SongName.Text = _selectedTrack.Title;
-            SongName.Tag = _selectedTrack.AlbumId;
-            AlbumCoverBorder.Tag = _selectedTrack.AlbumId;
+            SongName.Tag = _currentAlbum;
+            AlbumCoverBorder.Tag = _currentAlbum;
 
             ArtistName.Text = _selectedTrack.Artist;
-            ArtistName.Tag = _selectedTrack.ArtistId;
+            ArtistName.Tag = _selectedTrack.Artist;
 
-            LoadCoverFromUrl(_selectedTrack.CoverUrl);
+            await LoadCoverFromUrl(_selectedTrack.CoverUrl);
         }
 
-        void LoadCoverFromUrl(string url)
+        async Task LoadCoverFromUrl(string url)
         {
             if (string.IsNullOrEmpty(url))
             {
-                SetDefaultCover();
+                await SetDefaultCover();
                 return;
             }
 
@@ -268,24 +265,24 @@ namespace pleer.Resources.Windows
             catch (Exception ex)
             {
                 Debug.WriteLine($"⚠️ Ошибка загрузки обложки: {ex.Message}");
-                SetDefaultCover();
+                await SetDefaultCover();
             }
         }
 
-        void SetDefaultCover()
+        async Task SetDefaultCover()
         {
             try
             {
                 AlbumCover.ImageSource = UIElementsFactory.DecodePhoto(
                     InitializeData.GetDefaultCoverPath(),
-                    (int)AlbumCoverBorder.ActualWidth > 0 ? (int)AlbumCoverBorder.ActualWidth : 100);
+                    (int)(AlbumCoverBorder.ActualWidth > 0 ? AlbumCoverBorder.ActualWidth : 100));
             }
             catch { }
         }
         #endregion
 
         #region === ОБРАБОТЧИКИ КЛИКОВ ===
-        public void TrackCard_Click(object sender, MouseButtonEventArgs e)
+        public async void TrackCard_Click(object sender, MouseButtonEventArgs e)
         {
             if (sender is Border card && card.Tag is Track track)
             {
@@ -319,56 +316,49 @@ namespace pleer.Resources.Windows
 
         public async void AlbumCard_Click(object sender, MouseButtonEventArgs e)
         {
-            if (sender is Border border && border.Tag is int albumIdBorder && albumIdBorder > 0)
+            Album album = null;
+
+            if (sender is Border border && border.Tag is Album a1)
             {
-                var album = await _musicService.GetAlbumAsync(albumIdBorder);
-                if (album != null)
-                {
-                    CenterField.Navigate(new OpenCollectionPage(this, album, _listener));
-                    _currentAlbum = album;
-                }
+                album = a1;
             }
-            else if (sender is TextBlock textBlock && textBlock.Tag is int albumIdTB && albumIdTB > 0)
+            else if (sender is TextBlock textBlock && textBlock.Tag is Album a2)
             {
-                var album = await _musicService.GetAlbumAsync(albumIdTB);
-                if (album != null)
-                {
-                    CenterField.Navigate(new OpenCollectionPage(this, album, _listener));
-                    _currentAlbum = album;
-                }
+                album = a2;
             }
-            else if (sender is Border borderImage && borderImage.Tag is int albumIdBorderImage && albumIdBorderImage > 0)
+            else if (sender is Border borderImage && borderImage.Tag is Album a3)
             {
-                var album = await _musicService.GetAlbumAsync(albumIdBorderImage);
-                if (album != null)
-                {
-                    CenterField.Navigate(new OpenCollectionPage(this, album, _listener));
-                    _currentAlbum = album;
-                }
+                album = a3;
             }
+
+            if (album == null)
+                return;
+
+            _currentAlbum = album;
+            CenterField.Navigate(new OpenCollectionPage(this, album, _listener));
         }
 
-        // Клик на имя артиста
         public async void ArtistCard_Click(object sender, MouseButtonEventArgs e)
         {
-            // Клик на карточку артиста (Border)
             if (sender is Border card && card.Tag is Artist artist)
             {
-                if (_currentArtist?.Id != artist.Id)
+                if (!string.Equals(_currentArtist?.Name, artist.Name, StringComparison.OrdinalIgnoreCase))
                 {
                     CenterField.Navigate(new ArtistProfilePage(this, artist, _listener));
                 }
                 _currentArtist = artist;
             }
-            else if (sender is TextBlock textBlock && textBlock.Tag is int artistId && artistId > 0)
+            else if (sender is TextBlock textBlock &&
+                     textBlock.Tag is string artistName &&
+                     !string.IsNullOrWhiteSpace(artistName))
             {
                 try
                 {
-                    var artistTB = await _musicService.GetArtistAsync(artistId);
-                    if (artistTB != null)
+                    var artistFromService = await _musicService.GetArtistAsync(artistName);
+                    if (artistFromService != null)
                     {
-                        CenterField.Navigate(new ArtistProfilePage(this, artistTB, _listener));
-                        _currentArtist = artistTB;
+                        CenterField.Navigate(new ArtistProfilePage(this, artistFromService, _listener));
+                        _currentArtist = artistFromService;
                     }
                 }
                 catch (Exception ex)
@@ -457,7 +447,6 @@ namespace pleer.Resources.Windows
             }
             else
             {
-                // Иначе играем следующий из коллекции
                 PlayNextTrack();
             }
         }
@@ -496,6 +485,7 @@ namespace pleer.Resources.Windows
         void AddTrackToHistory(Track track)
         {
             _listeningHistory.Add(track);
+            _songSerialNumber = _listeningHistory.Count;
             _listenedHistoryPage.LoadListenedHistory();
         }
         #endregion
@@ -512,7 +502,7 @@ namespace pleer.Resources.Windows
 
         private void PositionSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            if (_isDraggingMediaSlider && _isDraggingMediaSlider && _audioStream != null)
+            if (_isDraggingMediaSlider && _audioStream != null)
             {
                 PositionSlider_ChangeValue(e.NewValue);
             }
@@ -521,13 +511,11 @@ namespace pleer.Resources.Windows
         private void PositionSlider_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             _isDraggingMediaSlider = true;
-            _isDraggingMediaSlider = false;
         }
 
         private void PositionSlider_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
             _isDraggingMediaSlider = false;
-            _isDraggingMediaSlider = true;
 
             if (_audioStream != null)
             {
@@ -584,9 +572,11 @@ namespace pleer.Resources.Windows
 
         void StopPlayback()
         {
-            _wavePlayer?.Stop();
-            _audioFile?.Dispose();
-            _audioFile = null;
+            try
+            {
+                _wavePlayer?.Stop();
+            }
+            catch { }
 
             _playerState = PlayerState.Paused;
             PlayIcon.Kind = PackIconKind.Play;
@@ -618,7 +608,6 @@ namespace pleer.Resources.Windows
 
             _wavePlayer?.Dispose();
             _audioStream?.Dispose();
-            _audioFile?.Dispose();
 
             _context?.Dispose();
         }

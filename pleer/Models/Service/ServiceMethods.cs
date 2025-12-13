@@ -2,29 +2,26 @@
 using pleer.Models.DatabaseContext;
 using pleer.Models.Media;
 using pleer.Models.Users;
-using System.Diagnostics;
 using System.IO;
-using System.Net.Mail;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows;
-using System.Windows.Threading;
 
 namespace pleer.Models.Service
 {
     // Сервисный класс для работы с плейлистами
     public class ServiceMethods
     {
-        public static void AddPlaylistWithLink(Listener listener)
+        public async static Task AddPlaylistWithLink(Listener listener)
         {
             using var context = new DBContext();
 
             try
             {
-                var playlistsCount = context.Playlists
+                var playlistsCount = await context.Playlists
                     .Where(p => p.CreatorId == listener.Id)
-                    .Count();
+                    .CountAsync();
 
                 PlaylistCover cover;
 
@@ -32,14 +29,14 @@ namespace pleer.Models.Service
 
                 if (playlistsCount == 0)
                 {
-                    cover = context.PlaylistCovers
-                        .First(pc => pc.FilePath == InitializeData.GetFavoritesCoverPath());
+                    cover = await context.PlaylistCovers
+                        .FirstAsync(pc => pc.FilePath == InitializeData.GetFavoritesCoverPath());
                     playlistTitle = "Избранное";
                 }
                 else
                 {
-                    cover = context.PlaylistCovers
-                        .First(pc => pc.FilePath == InitializeData.GetDefaultCoverPath());
+                    cover = await context.PlaylistCovers
+                        .FirstAsync(pc => pc.FilePath == InitializeData.GetDefaultCoverPath());
                     playlistTitle = $"Плейлист {playlistsCount + 1}";
                 }
 
@@ -58,8 +55,8 @@ namespace pleer.Models.Service
                     CreatorId = listener.Id
                 };
 
-                context.Playlists.Add(playlist);
-                context.SaveChanges();
+                await context.Playlists.AddAsync(playlist);
+                await context.SaveChangesAsync();
 
                 var link = new ListenerPlaylistsLink()
                 {
@@ -67,8 +64,8 @@ namespace pleer.Models.Service
                     PlaylistId = playlist.Id,
                 };
 
-                context.ListenerPlaylistsLinks.Add(link);
-                context.SaveChangesAsync();
+                await context.ListenerPlaylistsLinks.AddAsync(link);
+                await context.SaveChangesAsync();
 
                 return;
             }

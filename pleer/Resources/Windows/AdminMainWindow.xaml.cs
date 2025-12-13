@@ -1,11 +1,10 @@
-﻿using Microsoft.Extensions.Caching.Memory;
-using pleer.Models.DatabaseContext;
-using pleer.Models.Jamendo;
+﻿using pleer.Models.DatabaseContext;
 using pleer.Models.Service;
 using pleer.Models.Users;
 using pleer.Resources.Pages.AdminPages;
 using pleer.Resources.Pages.GeneralPages;
 using System.Windows;
+using System.Windows.Navigation;
 
 namespace pleer.Resources.Windows
 {
@@ -16,23 +15,16 @@ namespace pleer.Resources.Windows
     {
         DBContext _context = new();
 
-        public IMusicService _musicService;
-
-        Admin _admin;
-
         public AdminMainWindow()
         {
             InitializeComponent();
 
             LoadNonUserWindow();
-            InitializeMusicService();
         }
 
         public AdminMainWindow(Admin admin)
         {
             InitializeComponent();
-
-            _admin = admin;
         }
 
         void LoadNonUserWindow()
@@ -41,27 +33,14 @@ namespace pleer.Resources.Windows
             FullWindow.Navigate(new LoginPage(this));
         }
 
-        void InitializeMusicService()
-        {
-            if (App.Services != null)
-            {
-                _musicService = App.Services.GetService(typeof(IMusicService)) as IMusicService;
-            }
-            else
-            {
-                var cache = new MemoryCache(new MemoryCacheOptions());
-                _musicService = new JamendoService("99575e94", cache);
-            }
-        }
-
         private void UsersListButton_Click(object sender, RoutedEventArgs e)
         {
-            OperationField.Navigate(new UsersBanListPage());
+            OperationField.Navigate(new ListenersBanListPage());
         }
 
-        private void ReportsButton_Click(object sender, RoutedEventArgs e)
+        private void StatisticsButton_Click(object sender, RoutedEventArgs e)
         {
-            OperationField.Navigate(new ReportPage(_musicService));
+            OperationField.Navigate(new StatisticsPage());
         }
 
         // login as ktoto tam
@@ -89,7 +68,7 @@ namespace pleer.Resources.Windows
             ForwardButton.IsEnabled = OperationField.CanGoForward;
         }
 
-        private void OperationField_Navigated(object sender, System.Windows.Navigation.NavigationEventArgs e)
+        private void OperationField_Navigated(object sender, NavigationEventArgs e)
         {
             UpdateButtonState();
         }

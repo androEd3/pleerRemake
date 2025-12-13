@@ -1,4 +1,5 @@
-﻿using pleer.Models.DatabaseContext;
+﻿using Microsoft.EntityFrameworkCore;
+using pleer.Models.DatabaseContext;
 using pleer.Models.Service;
 using pleer.Models.Users;
 using pleer.Resources.Windows;
@@ -47,6 +48,12 @@ namespace pleer.Resources.Pages.GeneralPages
                         return;
                     }
 
+                    if (await _context.Listeners.FirstOrDefaultAsync(l => l.Email == UserEmail.Text) != default)
+                    {
+                        ErrorNoticePanel.Text = "Слушатель с такой почтой уже существует";
+                        return;
+                    }
+
                     var isPasswordSame = ServiceMethods.IsPasswordsSame(UserPassword.Text, RepeatedUserPassword.Text);
                     if (!isPasswordSame)
                     {
@@ -77,7 +84,7 @@ namespace pleer.Resources.Pages.GeneralPages
                     await _context.Listeners.AddAsync(newListener);
                     await _context.SaveChangesAsync();
 
-                    ServiceMethods.AddPlaylistWithLink(newListener);
+                    await ServiceMethods.AddPlaylistWithLink(newListener);
 
                     MessageBox.Show("Вы успешно зарегистрировались", Title = "Регистрация",
                                     MessageBoxButton.OK, MessageBoxImage.Information);

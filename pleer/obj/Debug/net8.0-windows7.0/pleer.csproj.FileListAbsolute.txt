@@ -140,8 +140,6 @@ D:\VISUAL_STUDIO_PROJ\player remake\pleer\bin\Debug\net8.0-windows7.0\runtimes\w
 D:\VISUAL_STUDIO_PROJ\player remake\pleer\bin\Debug\net8.0-windows7.0\runtimes\browser\lib\net8.0\System.Text.Encodings.Web.dll
 D:\VISUAL_STUDIO_PROJ\player remake\pleer\obj\Debug\net8.0-windows7.0\pleer.csproj.AssemblyReference.cache
 D:\VISUAL_STUDIO_PROJ\player remake\pleer\obj\Debug\net8.0-windows7.0\App.baml
-D:\VISUAL_STUDIO_PROJ\player remake\pleer\obj\Debug\net8.0-windows7.0\Resources\Pages\AdminPages\ReportPage.g.cs
-D:\VISUAL_STUDIO_PROJ\player remake\pleer\obj\Debug\net8.0-windows7.0\Resources\Pages\AdminPages\UsersBanListPage.g.cs
 D:\VISUAL_STUDIO_PROJ\player remake\pleer\obj\Debug\net8.0-windows7.0\Resources\Pages\Collections\CollectionsListPage.g.cs
 D:\VISUAL_STUDIO_PROJ\player remake\pleer\obj\Debug\net8.0-windows7.0\Resources\Pages\Collections\OpenCollectionPage.g.cs
 D:\VISUAL_STUDIO_PROJ\player remake\pleer\obj\Debug\net8.0-windows7.0\Resources\Pages\GeneralPages\ChangePasswordPage.g.cs
@@ -160,8 +158,6 @@ D:\VISUAL_STUDIO_PROJ\player remake\pleer\obj\Debug\net8.0-windows7.0\Resources\
 D:\VISUAL_STUDIO_PROJ\player remake\pleer\obj\Debug\net8.0-windows7.0\App.g.cs
 D:\VISUAL_STUDIO_PROJ\player remake\pleer\obj\Debug\net8.0-windows7.0\pleer_MarkupCompile.cache
 D:\VISUAL_STUDIO_PROJ\player remake\pleer\obj\Debug\net8.0-windows7.0\pleer_MarkupCompile.lref
-D:\VISUAL_STUDIO_PROJ\player remake\pleer\obj\Debug\net8.0-windows7.0\Resources\Pages\AdminPages\ReportPage.baml
-D:\VISUAL_STUDIO_PROJ\player remake\pleer\obj\Debug\net8.0-windows7.0\Resources\Pages\AdminPages\UsersBanListPage.baml
 D:\VISUAL_STUDIO_PROJ\player remake\pleer\obj\Debug\net8.0-windows7.0\Resources\Pages\Collections\CollectionsListPage.baml
 D:\VISUAL_STUDIO_PROJ\player remake\pleer\obj\Debug\net8.0-windows7.0\Resources\Pages\Collections\OpenCollectionPage.baml
 D:\VISUAL_STUDIO_PROJ\player remake\pleer\obj\Debug\net8.0-windows7.0\Resources\Pages\GeneralPages\ChangePasswordPage.baml
@@ -189,3 +185,7 @@ D:\VISUAL_STUDIO_PROJ\player remake\pleer\obj\Debug\net8.0-windows7.0\refint\ple
 D:\VISUAL_STUDIO_PROJ\player remake\pleer\obj\Debug\net8.0-windows7.0\pleer.pdb
 D:\VISUAL_STUDIO_PROJ\player remake\pleer\obj\Debug\net8.0-windows7.0\pleer.genruntimeconfig.cache
 D:\VISUAL_STUDIO_PROJ\player remake\pleer\obj\Debug\net8.0-windows7.0\ref\pleer.dll
+D:\VISUAL_STUDIO_PROJ\player remake\pleer\obj\Debug\net8.0-windows7.0\Resources\Pages\AdminPages\ListenersBanListPage.g.cs
+D:\VISUAL_STUDIO_PROJ\player remake\pleer\obj\Debug\net8.0-windows7.0\Resources\Pages\AdminPages\StatisticsPage.g.cs
+D:\VISUAL_STUDIO_PROJ\player remake\pleer\obj\Debug\net8.0-windows7.0\Resources\Pages\AdminPages\ListenersBanListPage.baml
+D:\VISUAL_STUDIO_PROJ\player remake\pleer\obj\Debug\net8.0-windows7.0\Resources\Pages\AdminPages\StatisticsPage.baml
