@@ -19,14 +19,14 @@ namespace pleer.Resources.Pages.UserPages
             ShowAlbumsList();
         }
 
-        void ShowAlbumsList()
+        public void ShowAlbumsList()
         {
             MediaLibraryAlbumsList.Navigate(_albumsList);
         }
 
-        private void CreatePlaylistButton_Click(object sender, RoutedEventArgs e)
+        private async void CreatePlaylistButton_Click(object sender, RoutedEventArgs e)
         {
-            _albumsList.CreatePlaylist();
+            await _albumsList.CreatePlaylist();
         }
     }
 }

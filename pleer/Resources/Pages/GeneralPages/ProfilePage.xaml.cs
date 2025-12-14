@@ -1,6 +1,7 @@
 ﻿using pleer.Models.DatabaseContext;
 using pleer.Models.Service;
 using pleer.Models.Users;
+using pleer.Resources.Pages.UserPages;
 using pleer.Resources.Windows;
 using System.Windows;
 using System.Windows.Controls;
@@ -45,7 +46,10 @@ namespace pleer.Resources.Pages.GeneralPages
             if (listener != null)
             {
                 UserName.Text = listener.Name;
+                _listenerMain.ListenerName.Text = listener.Name;
                 UserEmail.Text = listener.Email;
+
+                _listenerMain.MediaLibrary.Navigate(new MediaLibrary(_listenerMain, _listener));
 
                 var picture = _context.ProfilePictures
                     .Find(listener.ProfilePictureId);

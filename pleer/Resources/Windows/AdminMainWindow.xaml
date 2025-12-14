@@ -67,7 +67,7 @@
                                        Text="Список и блокировка пользователей"/>
                         </Button>
 
-                        <Button Margin="0 5" Content="Статистика" Click="StatisticsButton_Click"
+                        <Button Margin="0 5" Content="Статистика сервиса" Click="StatisticsButton_Click"
                                 Style="{StaticResource SimpleButtonV2}"/>
                     </StackPanel>
                 </Border>

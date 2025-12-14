@@ -141,7 +141,7 @@ namespace pleer.Models.Service
 
             var durationText = new TextBlock
             {
-                Text = track.Duration.ToString(),
+                Text = track.Duration?.ToString(@"mm\:ss"),
                 TextAlignment = TextAlignment.Center,
                 VerticalAlignment = VerticalAlignment.Center,
                 Margin = new Thickness(10, 0, 15, 0),
@@ -156,16 +156,17 @@ namespace pleer.Models.Service
 
         #region Add Song Button
         public static Grid CreateAddSongButton(
-            Listener listener,
-            Media.Track track,
-            PlacementMode Placement = PlacementMode.Bottom)
+            Listener Listener,
+            Media.Track Track,
+            PlacementMode Placement = PlacementMode.Bottom,
+            Visibility Visibility = Visibility.Collapsed)
         {
-            if (listener == default)
+            if (Listener == default)
                 return default;
 
             var grid = new Grid()
             {
-                Visibility = Visibility.Collapsed,
+                Visibility = Visibility,
             };
 
             var icon = new PackIcon
@@ -218,9 +219,10 @@ namespace pleer.Models.Service
             popup.Opened += (s, e) =>
             {
                 grid.Visibility = Visibility.Visible;
-                RefreshPlaylistsPanel(playlistsPanel, listener, track);
+                RefreshPlaylistsPanel(playlistsPanel, Listener, Track);
             };
-            popup.Closed += (s, e) => grid.Visibility = Visibility.Collapsed;
+            if (Visibility == Visibility.Collapsed)
+                popup.Closed += (s, e) => grid.Visibility = Visibility.Collapsed;
 
             var binding = new Binding("IsChecked")
             {
@@ -232,7 +234,7 @@ namespace pleer.Models.Service
             grid.Children.Add(toggleButton);
             grid.Children.Add(popup);
 
-            RefreshPlaylistsPanel(playlistsPanel, listener, track);
+            RefreshPlaylistsPanel(playlistsPanel, Listener, Track);
 
             return grid;
         }
@@ -845,13 +847,23 @@ namespace pleer.Models.Service
 
         public static string FormatTotalDuration(List<Media.Track> tracks)
         {
-            var total = TimeSpan.Zero;
-            foreach (var track in tracks)
-                total += (TimeSpan)track.Duration;
+            var total = tracks
+                .Select(t => t.Duration ?? TimeSpan.Zero)
+                .Aggregate(TimeSpan.Zero, (sum, d) => sum + d);
 
-            return total.TotalHours >= 1
-                ? total.ToString(@"h\:mm\:ss")
-                : total.ToString(@"mm\:ss");
+            return FormatDuration(total);
+        }
+
+        public static string FormatDuration(TimeSpan? duration)
+        {
+            var d = duration ?? TimeSpan.Zero;
+
+            if (d == TimeSpan.Zero)
+                return "0:00";
+
+            return d.TotalHours >= 1
+                ? d.ToString(@"h\:mm\:ss")
+                : d.ToString(@"m\:ss");
         }
 
         public static SolidColorBrush ColorConvert(string hex)

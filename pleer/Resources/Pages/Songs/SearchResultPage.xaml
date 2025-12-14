@@ -12,48 +12,39 @@
             <RowDefinition/>
         </Grid.RowDefinitions>
 
-        <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Hidden"
-                      Style="{StaticResource MinimalScrollViewer}">
-            <StackPanel Orientation="Horizontal">
-                <Button Content="Песни" Margin="5" Padding="10 5"
-                        VerticalAlignment="Center"
-                        Name="SearchSongsButton" Click="SearchTracksButton_Click"
-                        Style="{StaticResource SimpleButtonV3}"/>
+        <StackPanel Orientation="Horizontal">
+            <Button Content="Песни" Margin="5" Padding="10 5"
+            VerticalAlignment="Center"
+            Name="SearchSongsButton" Click="SearchTracksButton_Click"
+            Style="{StaticResource SimpleButtonV3}"/>
 
-                <Button Content="Альбомы" Margin="5" Padding="10 5"
-                        VerticalAlignment="Center"
-                        Name="SearchPlaylistsButton" Click="SearchAlbumsButton_Click"
-                        Style="{StaticResource SimpleButtonV3}"/>
+            <Button Content="Альбомы" Margin="5" Padding="10 5"
+            VerticalAlignment="Center"
+            Name="SearchPlaylistsButton" Click="SearchAlbumsButton_Click"
+            Style="{StaticResource SimpleButtonV3}"/>
 
-                <Button Content="Исполнители" Margin="5" Padding="10 5"
-                        VerticalAlignment="Center"
-                        Name="SearchArtistsButton" Click="SearchArtistsButton_Click"
-                        Style="{StaticResource SimpleButtonV3}"/>
+            <Button Content="Исполнители" Margin="5" Padding="10 5"
+            VerticalAlignment="Center"
+            Name="SearchArtistsButton" Click="SearchArtistsButton_Click"
+            Style="{StaticResource SimpleButtonV3}"/>
 
-                <StackPanel  Orientation="Horizontal" Margin="10 5">
-                    <TextBlock Text="Жанр:" Margin="0 0 5 0"
-                               VerticalAlignment="Center"
-                               Style="{StaticResource SmallInfoPanel}"/>
+            <StackPanel  Orientation="Horizontal" Margin="10 5">
+                <TextBlock Text="Жанр:" Margin="0 0 5 0"
+                   VerticalAlignment="Center"
+                   Style="{StaticResource SmallInfoPanel}"/>
 
-                    <ComboBox x:Name="GenreComboBox" Width="125"
-                              SelectionChanged="GenreComboBox_SelectionChanged" 
-                              Style="{StaticResource SimpleComboBox}"/>
-
-                    <Button Content="X" Click="ClearGenreButton_Click"
-                            Margin="10 0" Padding="10 5"
-                            Style="{StaticResource SimpleButton}"/>
-                </StackPanel>
+                <ComboBox x:Name="GenreComboBox" Width="125"
+                  SelectionChanged="GenreComboBox_SelectionChanged" 
+                  Style="{StaticResource SimpleComboBox}"/>
             </StackPanel>
-        </ScrollViewer>
+        </StackPanel>
 
-        <ScrollViewer Grid.Row="1" VerticalAlignment="Top"
-                      Style="{StaticResource MinimalScrollViewer}">
-            <StackPanel>
-                <TextBlock Text="Результаты поиска" 
-                           HorizontalAlignment="Left" Margin="5"
-                           Style="{StaticResource MainInfoPanel}"/>
-                <StackPanel Name="ContentList"/>
-            </StackPanel>
-        </ScrollViewer>
+        <StackPanel Grid.Row="1">
+            <TextBlock Text="Результаты поиска" 
+               HorizontalAlignment="Left" Margin="5"
+               Style="{StaticResource MainInfoPanel}"/>
+
+            <StackPanel Name="ContentList"/>
+        </StackPanel>
     </Grid>
 </Page>

@@ -1,15 +1,20 @@
 ﻿using pleer.Models.Media;
+using System.Diagnostics;
+using System.Globalization;
+using System.IO;
 using System.Net.Http;
 using System.Text.Json;
+using System.Text.RegularExpressions;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace pleer.Models.IA
 {
     public interface IMusicService
     {
-        Task<SearchResult> SearchAsync(string query, int limit = 50);
+        Task<SearchResult> SearchAsync(string query, int limit = 50, CancellationToken cancellationToken = default);
 
         Task<List<string>> GetAvailableGenres();
-        Task<List<Track>> GetTracksByGenreAsync(string genre, int limit = 50);
+        Task<List<Track>> GetTracksByGenreAsync(string genre, int limit = 50, CancellationToken cancellationToken = default);
 
         Task<IReadOnlyList<Track>> GetPopularTracksAsync(int limit = 10);
         Task<IReadOnlyList<Album>> GetPopularAlbumsAsync(int limit = 10);
@@ -24,6 +29,8 @@ namespace pleer.Models.IA
 
         Task<List<Track>> GetArtistTracksAsync(string artistId);
         Task<List<Album>> GetArtistAlbumsAsync(string artistId);
+
+        Task<ServiceStatistics> GetStatisticsAsync(CancellationToken cancellationToken = default);
     }
 
     public class SearchResult
@@ -33,9 +40,21 @@ namespace pleer.Models.IA
         public List<Artist> Artists { get; set; } = new();
     }
 
+    public class ServiceStatistics
+    {
+        public long TotalAudioItems { get; set; }
+        public long TotalMusicItems { get; set; }
+        public Track MostPopularTrack { get; set; }
+        public Album MostPopularAlbum { get; set; }
+        public Artist MostPopularArtist { get; set; }
+        public Dictionary<string, long> GenreStats { get; set; } = new();
+    }
+
     public class InternetArchiveService : IMusicService
     {
-        private readonly HttpClient _http = new();
+        private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(5, 5);
+        private readonly HttpClient _http = new() { Timeout = TimeSpan.FromSeconds(10) };
+
         private const string Base = "https://archive.org";
         private const string SearchUrl = Base + "/advancedsearch.php";
         private const string MetadataUrl = Base + "/metadata";
@@ -52,72 +71,75 @@ namespace pleer.Models.IA
             _http.DefaultRequestHeaders.UserAgent.ParseAdd("MusicApp/1.0");
         }
 
-        public async Task<SearchResult> SearchAsync(string query, int limit = 50)
+        public async Task<SearchResult> SearchAsync(string query, int limit = 20, CancellationToken cancellationToken = default)
         {
-            var q = string.IsNullOrWhiteSpace(query)
-                ? "collection:(etree OR georgeblood) AND mediatype:audio"
-                : $"({query}) AND collection:(etree OR georgeblood) AND mediatype:audio";
+            if (string.IsNullOrWhiteSpace(query))
+                return new SearchResult();
 
-            var docs = await SearchItemsAsync(q, 100);
+            var q = $"({query}) AND mediatype:audio";
+            var docs = await SearchItemsAsync(q, limit, cancellationToken);
 
-            var result = new SearchResult();
-            var seenAlbums = new HashSet<string>();
-            var seenArtists = new HashSet<string>();
+            if (!docs.Any())
+                return new SearchResult();
 
-            foreach (var doc in docs)
+            var trackTasks = docs.Take(limit).Select(doc =>
+                GetFirstTrackWithSemaphoreAsync(doc.Identifier, cancellationToken));
+
+            var tracks = (await Task.WhenAll(trackTasks))
+                .Where(t => t != null)
+                .ToList();
+
+            // Группируем для альбомов и артистов
+            var albums = tracks
+                .Where(t => !string.IsNullOrWhiteSpace(t.AlbumId))
+                .GroupBy(t => t.AlbumId)
+                .Select(g => new Album
+                {
+                    Id = g.Key,
+                    Title = g.First().Album ?? "Unknown Album",
+                    Artist = g.First().Artist ?? "Unknown Artist",
+                    CoverUrl = g.First().CoverUrl
+                })
+                .Take(20)
+                .ToList();
+
+            var artists = tracks
+                .Where(t => !string.IsNullOrWhiteSpace(t.Artist))
+                .GroupBy(t => t.Artist.ToLower())
+                .Select(g => new Artist
+                {
+                    Name = g.First().Artist,
+                    ProfileImageUrl = g.First().CoverUrl
+                })
+                .Take(20)
+                .ToList();
+
+            return new SearchResult
             {
-                var meta = await GetMetadataAsync(doc.Identifier);
-                if (meta?.Files == null) continue;
-
-                var audioFiles = meta.Files.Where(f => IsAudio(f.Format)).OrderBy(f => TrackNum(f)).ToList();
-                if (!audioFiles.Any()) continue;
-
-                var genre = FirstGenre(meta.Metadata.Subject);
-                var first = audioFiles.First();
-
-                var title = GetString(meta.Metadata.Title);
-                var creator = GetString(meta.Metadata.Creator);
-                var releaseDate = GetYear(meta.Metadata.Year, meta.Metadata.Date);
-
-                // Трек
-                result.Tracks.Add(new Track
-                {
-                    Id = $"{doc.Identifier}/{first.Name}",
-                    Title = first.Title ?? CleanName(first.Name),
-                    Artist = !string.IsNullOrWhiteSpace(creator) ? creator : "Unknown Artist",
-                    Album = !string.IsNullOrWhiteSpace(title) ? title : "Unknown Album",
-                    StreamUrl = BuildStreamUrl(doc.Identifier, first.Name),
-                    CoverUrl = BuildCoverUrl(doc.Identifier),
-                    Duration = ParseSec(first.Length),
-                    Genre = genre
-                });
-
-                // Альбом
-                if (seenAlbums.Add(doc.Identifier))
-                {
-                    result.Albums.Add(new Album
-                    {
-                        Id = doc.Identifier,
-                        Title = !string.IsNullOrWhiteSpace(title) ? title : "Unknown Album",
-                        Artist = !string.IsNullOrWhiteSpace(creator) ? creator : "Unknown Artist",
-                        ReleaseDate = releaseDate,
-                        CoverUrl = BuildCoverUrl(doc.Identifier)
-                    });
-                }
-
-                // Артист
-                if (!string.IsNullOrWhiteSpace(creator) && seenArtists.Add(creator))
-                {
-                    result.Artists.Add(new Artist
-                    {
-                        Name = creator
-                    });
-                }
-            }
-
-            result.Tracks = result.Tracks.Take(limit).ToList();
-            return result;
+                Tracks = tracks,
+                Albums = albums,
+                Artists = artists
+            };
         }
+
+        private async Task<Track> GetFirstTrackWithSemaphoreAsync(string identifier, CancellationToken cancellationToken = default)
+        {
+            await _semaphore.WaitAsync(cancellationToken);
+            try
+            {
+                return await GetFirstTrackAsync(identifier, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error loading track from {identifier}: {ex.Message}");
+                return null;
+            }
+            finally
+            {
+                _semaphore.Release();
+            }
+        }
+
 
         public Task<List<string>> GetAvailableGenres() => Task.FromResult(new List<string>
         {
@@ -125,17 +147,18 @@ namespace pleer.Models.IA
             "folk", "metal", "reggae", "punk", "funk"
         });
 
-        public async Task<List<Track>> GetTracksByGenreAsync(string genre, int limit = 50)
+        public async Task<List<Track>> GetTracksByGenreAsync(string genre, int limit = 20, CancellationToken cancellationToken = default)
         {
             var q = $"subject:\"{genre}\" AND mediatype:audio";
-            var docs = await SearchItemsAsync(q, limit);
+            var docs = await SearchItemsAsync(q, limit, cancellationToken);
 
-            var tracks = new List<Track>();
-            foreach (var doc in docs)
-            {
-                var track = await GetFirstTrackAsync(doc.Identifier);
-                if (track != null) tracks.Add(track);
-            }
+            var trackTasks = docs.Select(doc =>
+                GetFirstTrackWithSemaphoreAsync(doc.Identifier, cancellationToken));
+
+            var tracks = (await Task.WhenAll(trackTasks))
+                .Where(t => t != null)
+                .ToList();
+
             return tracks;
         }
 
@@ -179,36 +202,62 @@ namespace pleer.Models.IA
             var creator = GetString(meta.Metadata.Creator);
             var releaseDate = GetYear(meta.Metadata.Year, meta.Metadata.Date);
 
-            var tracks = meta.Files
-                .Where(f => IsAudio(f.Format))
-                .OrderBy(f => TrackNum(f))
-                .Select(f => new Track
-                {
-                    Id = $"{albumId}/{f.Name}",
-                    Title = f.Title ?? CleanName(f.Name),
-                    Artist = !string.IsNullOrWhiteSpace(creator) ? creator : "Unknown",
-                    Album = title,
-                    StreamUrl = BuildStreamUrl(albumId, f.Name),
-                    CoverUrl = BuildCoverUrl(albumId),
-                    Duration = ParseSec(f.Length),
-                    Genre = genre
-                }).ToList();
-
             return new Album
             {
                 Id = albumId,
                 Title = !string.IsNullOrWhiteSpace(title) ? title : "Unknown Album",
                 Artist = !string.IsNullOrWhiteSpace(creator) ? creator : "Unknown Artist",
                 ReleaseDate = releaseDate,
-                CoverUrl = BuildCoverUrl(albumId),
-                Tracks = tracks
+                CoverUrl = BuildCoverUrl(albumId)
             };
         }
 
         public async Task<List<Track>> GetAlbumTracksAsync(string albumId)
         {
-            var album = await GetAlbumAsync(albumId);
-            return album?.Tracks ?? new List<Track>();
+            var meta = await GetMetadataAsync(albumId);
+            if (meta?.Metadata == null) return new List<Track>();
+
+            var genre = FirstGenre(meta.Metadata.Subject);
+            var title = GetString(meta.Metadata.Title);
+            var creator = GetString(meta.Metadata.Creator);
+
+            var tracks = meta.Files
+                .Where(f => IsAudio(f.Format))
+                .GroupBy(f => GetTrackBaseName(f.Name))
+                .Select(g => g.OrderByDescending(f => GetFormatPriority(f.Format)).First())
+                .OrderBy(TrackNum)
+                .Select(f => new Track
+                {
+                    Id = $"{albumId}/{f.Name}",
+                    Title = f.Title ?? CleanName(f.Name),
+                    Artist = !string.IsNullOrWhiteSpace(creator) ? creator : "Unknown",
+                    Album = title,
+                    AlbumId = albumId,
+                    StreamUrl = BuildStreamUrl(albumId, f.Name),
+                    CoverUrl = BuildCoverUrl(albumId),
+                    Duration = ParseSec(f.Length),
+                    Genre = genre
+                }).ToList();
+
+            string GetTrackBaseName(string fileName)
+            {
+                var name = Path.GetFileNameWithoutExtension(fileName);
+                return Regex.Replace(name, @"_?(vbr|128|192|256|320|flac|ogg)$", "", RegexOptions.IgnoreCase);
+            }
+
+            int GetFormatPriority(string format)
+            {
+                return format?.ToLower() switch
+                {
+                    "vbr mp3" => 5,
+                    "mp3" => 4,
+                    "ogg vorbis" => 3,
+                    "flac" => 2,
+                    _ => 1
+                };
+            }
+
+            return tracks;
         }
 
         public async Task<Track> GetTrackAsync(string trackId)
@@ -225,8 +274,8 @@ namespace pleer.Models.IA
             var file = meta?.Files?.FirstOrDefault(f =>
                 f.Name.Equals(fileName, StringComparison.OrdinalIgnoreCase));
 
-            var title = GetString(meta.Metadata.Title);
-            var creator = GetString(meta.Metadata.Creator);
+            var title = GetString(meta.Metadata.Title) ?? "Unknown";
+            var creator = GetString(meta.Metadata.Creator) ?? "Unknown";
 
             if (file == null || meta?.Metadata == null) return null;
 
@@ -236,6 +285,7 @@ namespace pleer.Models.IA
                 Title = file.Title ?? CleanName(file.Name),
                 Artist = !string.IsNullOrWhiteSpace(creator) ? creator : "Unknown",
                 Album = title,
+                AlbumId = identifier,
                 StreamUrl = BuildStreamUrl(identifier, file.Name),
                 CoverUrl = BuildCoverUrl(identifier),
                 Duration = ParseSec(file.Length),
@@ -263,44 +313,49 @@ namespace pleer.Models.IA
 
             artist.ProfileImageUrl = BuildCoverUrl(docs[0].Identifier);
 
-            var popularTracks = new List<Track>();
-            foreach (var doc in docs)
-            {
-                if (popularTracks.Count >= 6) break;
-                var track = await GetFirstTrackAsync(doc.Identifier);
-                if (track != null) popularTracks.Add(track);
-            }
-            artist.PopularTracks = popularTracks;
-
-            // Все альбомы
-            artist.Albums = docs.Select(d => new Album
-            {
-                Id = d.Identifier,
-                Title = GetString(d.Title) ?? "Unknown Album",
-                Artist = GetString(d.Creator) ?? artistName,
-                ReleaseDate = GetYear(d.Year, d.Date),
-                CoverUrl = BuildCoverUrl(d.Identifier)
-            }).ToList();
-
             return artist;
         }
 
-        public async Task<List<Track>> GetArtistTracksAsync(string artistId)
+        public async Task<List<Track>> GetArtistTracksAsync(string artistName)
         {
-            if (string.IsNullOrWhiteSpace(artistId))
+            if (string.IsNullOrWhiteSpace(artistName))
                 return new List<Track>();
 
-            var q = $"creator:\"{artistId}\" AND mediatype:audio";
+            var q = $"creator:\"{artistName}\" AND mediatype:audio";
             var docs = await SearchItemsAsync(q, 30);
 
-            var tracks = new List<Track>();
-            foreach (var doc in docs)
-            {
-                var track = await GetFirstTrackAsync(doc.Identifier);
-                if (track != null) tracks.Add(track);
-            }
+            if (!docs.Any())
+                return new List<Track>();
 
-            return tracks;
+            var albumsToLoad = docs.Take(10).ToList();
+
+            var tracksTasks = albumsToLoad.Select(async doc =>
+            {
+                try
+                {
+                    return await GetAlbumTracksAsync(doc.Identifier);
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"Error loading tracks from {doc.Identifier}: {ex.Message}");
+                    return new List<Track>();
+                }
+            });
+
+            var tracksArrays = await Task.WhenAll(tracksTasks);
+            var allTracks = tracksArrays.SelectMany(t => t).ToList();
+
+            var uniqueTracks = allTracks
+                .Where(t => !string.IsNullOrWhiteSpace(t.Title))
+                .GroupBy(t => new
+                {
+                    Title = t.Title.Trim().ToLower(),
+                    Duration = (int)(t.Duration?.TotalSeconds ?? 0)
+                })
+                .Select(g => g.First())
+                .ToList();
+
+            return uniqueTracks;
         }
 
         public async Task<List<Album>> GetArtistAlbumsAsync(string artistId)
@@ -321,7 +376,7 @@ namespace pleer.Models.IA
             }).ToList();
         }
 
-        private async Task<List<IaDoc>> SearchItemsAsync(string query, int rows)
+        private async Task<List<IaDoc>> SearchItemsAsync(string query, int rows, CancellationToken cancellationToken = default)
         {
             var url = $"{SearchUrl}?q={Uri.EscapeDataString(query)}" +
                       $"&fl[]=identifier,title,creator,date,year,subject" +
@@ -329,28 +384,51 @@ namespace pleer.Models.IA
                       $"&sort[]=downloads desc" +
                       $"&output=json";
 
-            var json = await _http.GetStringAsync(url);
-            var resp = JsonSerializer.Deserialize<IaSearchResponse>(json, JsonOpts);
-
-            return resp?.Response?.Docs ?? new List<IaDoc>();
+            try
+            {
+                var response = await _http.GetAsync(url, cancellationToken);
+                response.EnsureSuccessStatusCode();
+                var json = await response.Content.ReadAsStringAsync();
+                var resp = JsonSerializer.Deserialize<IaSearchResponse>(json, JsonOpts);
+                return resp?.Response?.Docs ?? new List<IaDoc>();
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Search error: {ex.Message}");
+                return new List<IaDoc>();
+            }
         }
 
-        private async Task<IaMetadataResponse> GetMetadataAsync(string identifier)
+        private async Task<IaMetadataResponse> GetMetadataAsync(string identifier, CancellationToken cancellationToken = default)
         {
             try
             {
-                var json = await _http.GetStringAsync($"{MetadataUrl}/{identifier}");
+                var response = await _http.GetAsync($"{MetadataUrl}/{identifier}", cancellationToken);
+                response.EnsureSuccessStatusCode();
+                var json = await response.Content.ReadAsStringAsync();
                 return JsonSerializer.Deserialize<IaMetadataResponse>(json, JsonOpts);
             }
-            catch { return null; }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error getting metadata for {identifier}: {ex.Message}");
+                return null;
+            }
         }
 
-        private async Task<Track> GetFirstTrackAsync(string identifier)
+        private async Task<Track> GetFirstTrackAsync(string identifier, CancellationToken cancellationToken = default)
         {
-            var meta = await GetMetadataAsync(identifier);
+            var meta = await GetMetadataAsync(identifier, cancellationToken);
             var file = meta?.Files?
                 .Where(f => IsAudio(f.Format))
-                .OrderBy(f => TrackNum(f))
+                .OrderBy(TrackNum)
                 .FirstOrDefault();
 
             if (file == null || meta?.Metadata == null) return null;
@@ -364,11 +442,176 @@ namespace pleer.Models.IA
                 Title = file.Title ?? CleanName(file.Name),
                 Artist = !string.IsNullOrWhiteSpace(creator) ? creator : "Unknown",
                 Album = title,
+                AlbumId = identifier,
                 StreamUrl = BuildStreamUrl(identifier, file.Name),
                 CoverUrl = BuildCoverUrl(identifier),
                 Duration = ParseSec(file.Length),
                 Genre = FirstGenre(meta.Metadata.Subject)
             };
+        }
+
+        public async Task<ServiceStatistics> GetStatisticsAsync(CancellationToken cancellationToken = default)
+        {
+            var stats = new ServiceStatistics();
+
+            try
+            {
+                var totalAudioTask = GetTotalCountAsync("mediatype:audio", cancellationToken);
+                var totalMusicTask = GetTotalCountAsync("mediatype:audio AND subject:music", cancellationToken);
+                var popularTrackTask = GetMostPopularTrackAsync(cancellationToken);
+                var popularAlbumTask = GetMostPopularAlbumAsync(cancellationToken);
+                var popularArtistTask = GetMostPopularArtistAsync(cancellationToken);
+                var genreStatsTask = GetGenreStatisticsAsync(cancellationToken);
+
+                await Task.WhenAll(
+                    totalAudioTask,
+                    totalMusicTask,
+                    popularTrackTask,
+                    popularAlbumTask,
+                    popularArtistTask,
+                    genreStatsTask
+                );
+
+                stats.TotalAudioItems = await totalAudioTask;
+                stats.TotalMusicItems = await totalMusicTask;
+                stats.MostPopularTrack = await popularTrackTask;
+                stats.MostPopularAlbum = await popularAlbumTask;
+                stats.MostPopularArtist = await popularArtistTask;
+                stats.GenreStats = await genreStatsTask;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error loading statistics: {ex.Message}");
+            }
+
+            return stats;
+        }
+
+        private async Task<long> GetTotalCountAsync(string query, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var url = $"{SearchUrl}?q={Uri.EscapeDataString(query)}" +
+                          $"&rows=0" +
+                          $"&output=json";
+
+                var response = await _http.GetAsync(url, cancellationToken);
+                response.EnsureSuccessStatusCode();
+                var json = await response.Content.ReadAsStringAsync();
+                var resp = JsonSerializer.Deserialize<IaSearchResponse>(json, JsonOpts);
+
+                return resp?.Response?.NumFound ?? 0;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error getting count: {ex.Message}");
+                return 0;
+            }
+        }
+
+        private async Task<Track> GetMostPopularTrackAsync(CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var q = "mediatype:audio AND subject:music";
+                var docs = await SearchItemsAsync(q, 1, cancellationToken); 
+
+                if (docs.Any())
+                {
+                    return await GetFirstTrackAsync(docs[0].Identifier, cancellationToken);
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error getting popular track: {ex.Message}");
+            }
+
+            return null;
+        }
+
+        private async Task<Album> GetMostPopularAlbumAsync(CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var q = "mediatype:audio AND subject:music";
+                var docs = await SearchItemsAsync(q, 1, cancellationToken);
+
+                if (docs.Any())
+                {
+                    var doc = docs[0];
+                    return new Album
+                    {
+                        Id = doc.Identifier,
+                        Title = GetString(doc.Title) ?? "Unknown Album",
+                        Artist = GetString(doc.Creator) ?? "Unknown Artist",
+                        ReleaseDate = GetYear(doc.Year, doc.Date),
+                        CoverUrl = BuildCoverUrl(doc.Identifier)
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error getting popular album: {ex.Message}");
+            }
+
+            return null;
+        }
+
+        private async Task<Artist> GetMostPopularArtistAsync(CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var q = "mediatype:audio AND subject:music";
+                var docs = await SearchItemsAsync(q, 10, cancellationToken);
+
+                var artistName = docs
+                    .Where(d => !string.IsNullOrWhiteSpace(GetString(d.Creator)))
+                    .GroupBy(d => GetString(d.Creator))
+                    .OrderByDescending(g => g.Count())
+                    .FirstOrDefault()?.Key;
+
+                if (!string.IsNullOrWhiteSpace(artistName))
+                {
+                    return new Artist
+                    {
+                        Name = artistName,
+                        ProfileImageUrl = BuildCoverUrl(docs.First(d => GetString(d.Creator) == artistName).Identifier)
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error getting popular artist: {ex.Message}");
+            }
+
+            return null;
+        }
+
+        private async Task<Dictionary<string, long>> GetGenreStatisticsAsync(CancellationToken cancellationToken = default)
+        {
+            var genres = new[] { "rock", "pop", "jazz", "classical", "electronic", "hip-hop", "folk", "blues" };
+            var stats = new Dictionary<string, long>();
+
+            var tasks = genres.Select(async genre =>
+            {
+                var count = await GetTotalCountAsync($"subject:\"{genre}\" AND mediatype:audio", cancellationToken);
+                return (genre, count);
+            });
+
+            var results = await Task.WhenAll(tasks);
+
+            foreach (var (genre, count) in results.OrderByDescending(r => r.count))
+            {
+                stats[CapitalizeFirst(genre)] = count;
+            }
+
+            return stats;
+        }
+
+        private string CapitalizeFirst(string s)
+        {
+            if (string.IsNullOrEmpty(s)) return s;
+            return char.ToUpper(s[0]) + s.Substring(1);
         }
 
         private string BuildStreamUrl(string id, string file)
@@ -386,14 +629,39 @@ namespace pleer.Models.IA
             => int.TryParse(f.Track, out var n) ? n : int.MaxValue;
 
         private string CleanName(string n)
-            => System.IO.Path.GetFileNameWithoutExtension(n);
+            => Path.GetFileNameWithoutExtension(n);
 
         private TimeSpan? ParseSec(string s)
-            => double.TryParse(s, System.Globalization.NumberStyles.Any,
-                System.Globalization.CultureInfo.InvariantCulture, out var sec)
-                ? TimeSpan.FromSeconds(sec)
-                : null;
+        {
+            if (string.IsNullOrWhiteSpace(s))
+                return null;
 
+            s = s.Trim();
+
+            if (double.TryParse(s, NumberStyles.Any, CultureInfo.InvariantCulture, out var sec))
+                return TimeSpan.FromSeconds(sec);
+
+            // Попытка 2: Ручной парсинг MM:SS или H:MM:SS
+            var parts = s.Split(':');
+
+            if (parts.Length == 2 &&
+                int.TryParse(parts[0], out var min) &&
+                int.TryParse(parts[1], out var secs))
+            {
+                return new TimeSpan(0, min, secs);
+            }
+
+            if (parts.Length == 3 &&
+                int.TryParse(parts[0], out var hrs) &&
+                int.TryParse(parts[1], out var mins) &&
+                int.TryParse(parts[2], out var seconds))
+            {
+                return new TimeSpan(hrs, mins, seconds);
+            }
+
+            Debug.WriteLine($"Не удалось распарсить длительность: '{s}'");
+            return null;
+        }
         private string FirstGenre(JsonElement e)
         {
             if (e.ValueKind == JsonValueKind.Array)

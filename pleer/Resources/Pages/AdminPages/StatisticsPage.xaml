@@ -6,91 +6,119 @@
       xmlns:local="clr-namespace:pleer.Resources.Pages.AdminPages"
         mc:Ignorable="d">
 
-    <Grid Margin="5 0">
+    <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="auto"/>
             <RowDefinition Height="auto"/>
             <RowDefinition/>
         </Grid.RowDefinitions>
-
-        <Border Padding="10" Style="{StaticResource NonFunctionalField22}">
-            <TextBlock Text="Статистика данных"
-                   Style="{StaticResource MainInfoPanel}"/>
-        </Border>
-
-        <StackPanel Grid.Row="1" Margin="20 15" Orientation="Horizontal" Visibility="Collapsed">
-            <TextBlock Text="Отчет от:" TextWrapping="Wrap"
+        
+        <StackPanel Grid.RowSpan="2" x:Name="LoadingIndicator" 
+                    HorizontalAlignment="Center" VerticalAlignment="Center"
+                    Visibility="Collapsed">
+            <ProgressBar IsIndeterminate="True" Width="200" Height="4"/>
+            <TextBlock Text="Загрузка статистики..." 
+                       HorizontalAlignment="Center" Margin="0 10 0 0"
                        Style="{StaticResource SmallMainInfoPanel}"/>
-            <DatePicker Name="StartDateSelector" Margin="10 0"
-                        SelectedDateChanged="DateSelector_SelectedDateChanged"
-                        FirstDayOfWeek="Monday" SelectedDateFormat="Short"/>
-
-            <TextBlock Text="до:" TextWrapping="Wrap"
-                       Style="{StaticResource SmallMainInfoPanel}"/>
-            <DatePicker Name="EndDateSelector" Margin="10 0"
-                        SelectedDateChanged="DateSelector_SelectedDateChanged"
-                        FirstDayOfWeek="Monday" SelectedDateFormat="Short"/>
         </StackPanel>
 
-        <Button Grid.Row="1" Margin="20 0" Padding="10" Visibility="Collapsed"
-                Content="Получить локальные данные" Click="UpdateReportDataButton_Click"
-                VerticalAlignment="Center" HorizontalAlignment="Right"
-                Style="{StaticResource SimpleButton}"/>
+        <Border Name="TitleBorder" Margin="5 0 0 5" Padding="10"
+                Style="{StaticResource NonFunctionalField22}">
+            <TextBlock Text="Статистика сервиса" 
+                       Style="{StaticResource MainInfoPanel}"/>
+        </Border>
 
-        <ScrollViewer Grid.Row="2" Style="{StaticResource MinimalScrollViewer}">
-            <Grid Margin="5 0">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="auto"/>
-                    <ColumnDefinition/>
-                </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="auto"/>
-                    <RowDefinition Height="auto"/>
-                    <RowDefinition Height="auto"/>
-                    <RowDefinition Height="auto"/>
-                    <RowDefinition Height="auto"/>
-                    <RowDefinition Height="auto"/>
-                    <RowDefinition Height="auto"/>
-                    <RowDefinition Height="auto"/>
-                    <RowDefinition Height="auto"/>
-                </Grid.RowDefinitions>
+        <ScrollViewer Grid.Row="1" x:Name="ContentPanel" Style="{StaticResource MinimalScrollViewer}">
+            <StackPanel Margin="20">
+                <TextBlock Text="Данные приложения" Margin="0 0 0 20"
+                           Style="{StaticResource ArtistNameCenterPanel}"/>
 
-                <TextBlock Grid.Row="1" Text="Всего слушателей:"
-                           HorizontalAlignment="Right" VerticalAlignment="Top" Margin="10 5"
-                           Style="{StaticResource SmallMainInfoPanel}"/>
-                <TextBlock Grid.Row="1" Grid.Column="1" Name="TotalListeners" Margin="10 5"
-                           TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" 
-                           Style="{StaticResource SmallMainInfoPanel}"/>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
 
+                    <StackPanel Grid.Column="0" Margin="0 0 10 0">
+                        <TextBlock Text="Слушателей" Style="{StaticResource SmallInfoPanel}"/>
+                        <TextBlock x:Name="TotalListeners" Text="0" Margin="5"
+                                   Style="{StaticResource SmallMainInfoPanel}"/>
+                    </StackPanel>
 
-                <TextBlock Grid.Row="4" Text="Всего плейлистов:"
-                           HorizontalAlignment="Right" VerticalAlignment="Top" Margin="10 5"
-                           Style="{StaticResource SmallMainInfoPanel}"/>
-                <TextBlock Grid.Row="4" Grid.Column="1" Name="TotalPlaylists" Margin="10 5"
-                           TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" 
-                           Style="{StaticResource SmallMainInfoPanel}"/>
+                    <StackPanel Grid.Column="1" Margin="0,0,10,0">
+                        <TextBlock Text="Плейлистов" Style="{StaticResource SmallInfoPanel}"/>
+                        <TextBlock x:Name="TotalPlaylists" Text="0" Margin="5"
+                                   Style="{StaticResource SmallMainInfoPanel}"/>
+                    </StackPanel>
+                </Grid>
 
-                <TextBlock Grid.Row="6" Text="Самая популярная песня:"
-                           HorizontalAlignment="Right" VerticalAlignment="Top" Margin="10 10 10 5"
-                           Style="{StaticResource SmallMainInfoPanel}"/>
-                <TextBlock Grid.Row="6" Grid.Column="1" Name="MostPopularSong" Margin="10 10 10 5"
-                           TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" 
-                           Style="{StaticResource SmallMainInfoPanel}"/>
+                <Border Height="1" Background="LightGray" Margin="0 20"/>
 
-                <TextBlock Grid.Row="7" Text="Самый популярный альбом:"
-                           HorizontalAlignment="Right" VerticalAlignment="Top" Margin="10 5"
-                           Style="{StaticResource SmallMainInfoPanel}"/>
-                <TextBlock Grid.Row="7" Grid.Column="1" Name="MostPopularAlbum" Margin="10 5"
-                           TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" 
-                           Style="{StaticResource SmallMainInfoPanel}"/>
+                <TextBlock Text="Archive.org" Margin="0 0 0 20"
+                           Style="{StaticResource ArtistNameCenterPanel}"/>
 
-                <TextBlock Grid.Row="8" Text="Самый популярный исполнитель:"
-                           HorizontalAlignment="Right" VerticalAlignment="Top" Margin="10"
-                           Style="{StaticResource SmallMainInfoPanel}"/>
-                <TextBlock Grid.Row="8" Grid.Column="1" Name="MostPopularArtist" Margin="10"
-                           TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" 
-                           Style="{StaticResource SmallMainInfoPanel}"/>
-            </Grid>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0" Margin="0 0 10 0">
+                        <TextBlock Text="Всего аудио" Style="{StaticResource SmallInfoPanel}"/>
+                        <TextBlock x:Name="TotalSongs" Text="..." Margin="5"
+                                   Style="{StaticResource SmallMainInfoPanel}"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="1">
+                        <TextBlock Text="Музыкальных записей" Style="{StaticResource SmallInfoPanel}"/>
+                        <TextBlock x:Name="TotalMusicItems" Text="..." Margin="5"
+                                   Style="{StaticResource SmallMainInfoPanel}"/>
+                    </StackPanel>
+                </Grid>
+
+                <Border Height="1" Background="LightGray" Margin="0 20"/>
+
+                <TextBlock Text="Популярное" Margin="0 0 0 20"
+                           Style="{StaticResource ArtistNameCenterPanel}" />
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0" Margin="0 0 15 0">
+                        <TextBlock Text="🎵 Трек" Margin="0 0 0 10" Style="{StaticResource SmallInfoPanel}"/>
+                        <TextBlock x:Name="MostPopularSong" Text="..." Style="{StaticResource SmallMainInfoPanel}" TextTrimming="CharacterEllipsis"/>
+                        <TextBlock x:Name="MostPopularSongArtist" Style="{StaticResource SmallMainInfoPanel}" FontSize="12"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="1" Margin="0 0 15 0">
+                        <TextBlock Text="💿 Альбом" Margin="0 0 0 10" Style="{StaticResource SmallInfoPanel}"/>
+                        <TextBlock x:Name="MostPopularAlbum" Text="..." Style="{StaticResource SmallMainInfoPanel}" TextTrimming="CharacterEllipsis"/>
+                        <TextBlock x:Name="MostPopularAlbumArtist" Style="{StaticResource SmallMainInfoPanel}" FontSize="12"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Text="🎤 Исполнитель" Margin="0 0 0 10" Style="{StaticResource SmallInfoPanel}"/>
+                        <TextBlock x:Name="MostPopularArtist" Text="..." Style="{StaticResource SmallMainInfoPanel}"/>
+                    </StackPanel>
+                </Grid>
+
+                <Border Height="1" Background="LightGray" Margin="0,20"/>
+
+                <TextBlock Text="По жанрам" Margin="0 0 0 10"
+                           Style="{StaticResource ArtistNameCenterPanel}"/>
+
+                <StackPanel x:Name="GenreStatsPanel"/>
+
+                <Button Content="Обновить" Click="UpdateReportDataButton_Click"
+                        HorizontalAlignment="Left" Margin="0 20 0 0" Padding="15 10"
+                        Style="{StaticResource SimpleButton}"/>
+
+                <TextBlock x:Name="ErrorMessage" Foreground="Red" 
+                           Visibility="Collapsed" Margin="0 10 0 0"/>
+            </StackPanel>
         </ScrollViewer>
     </Grid>
 </Page>

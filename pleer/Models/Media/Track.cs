@@ -7,6 +7,7 @@ public class Track
     public string Title { get; set; }
     public string Artist { get; set; }
     public string Album { get; set; }
+    public string AlbumId { get; set; }
 
     public string StreamUrl { get; set; }
     public string CoverUrl { get; set; }

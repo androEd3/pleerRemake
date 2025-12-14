@@ -1,7 +1,9 @@
 ﻿using pleer.Models.DatabaseContext;
+using pleer.Models.IA;
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 
 namespace pleer.Resources.Pages.AdminPages
 {
@@ -11,71 +13,170 @@ namespace pleer.Resources.Pages.AdminPages
     public partial class StatisticsPage : Page
     {
         DBContext _context = new();
+        IMusicService _musicService;
+        private CancellationTokenSource _loadCancellation;
 
         public StatisticsPage()
         {
             InitializeComponent();
+            InitializeMusicService();
 
             Loaded += async (s, e) => await LoadReportDataAsync();
         }
 
-        private async Task LoadReportDataAsync()
+        void InitializeMusicService()
         {
-            try
+            if (App.Services != null)
             {
-                await LoadApiDataAsync();
+                _musicService = (IMusicService)App.Services.GetService(typeof(IMusicService));
+                Debug.WriteLine($"Сервис из DI: {_musicService != null}");
             }
-            catch { }
         }
 
-        #region API данные
-        private async Task LoadApiDataAsync()
+        private async Task LoadReportDataAsync()
+        {
+            _loadCancellation?.Cancel();
+            _loadCancellation = new CancellationTokenSource();
+            var token = _loadCancellation.Token;
+
+            try
+            {
+                ShowLoading(true);
+
+                // Локальные данные из БД
+                await LoadLocalDataAsync();
+
+                // Данные из API
+                await LoadApiDataAsync(token);
+
+                ShowLoading(false);
+            }
+            catch (OperationCanceledException)
+            {
+                Debug.WriteLine("Loading cancelled");
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error loading report: {ex.Message}");
+                ShowLoading(false);
+                ShowError("Ошибка загрузки данных");
+            }
+        }
+
+        private async Task LoadLocalDataAsync()
+        {
+            await Task.Run(() =>
+            {
+                var listenersCount = _context.Listeners.Count();
+                var playlistsCount = _context.Playlists.Count();
+
+                Dispatcher.Invoke(() =>
+                {
+                    TotalListeners.Text = listenersCount.ToString("N0");
+                    TotalPlaylists.Text = playlistsCount.ToString("N0");
+                });
+            });
+        }
+
+        private async Task LoadApiDataAsync(CancellationToken token)
         {
             try
             {
-                TotalListeners.Text = _context.Listeners.Count().ToString();
-                TotalPlaylists.Text = _context.Playlists.Count().ToString();
+                var stats = await _musicService.GetStatisticsAsync(token);
 
-                // Параллельная загрузка
-                //await Task.WhenAll(tracksTask, albumsTask, artistsTask);
+                if (token.IsCancellationRequested) return;
 
-                //var tracks = (await tracksTask).ToList();
-                //var albums = (await albumsTask).ToList();
-                //var artists = (await artistsTask).ToList();
+                // Общие данные
+                TotalSongs.Text = FormatLargeNumber(stats.TotalAudioItems);
+                TotalMusicItems.Text = FormatLargeNumber(stats.TotalMusicItems);
 
-                //// Статистика
-                ////TotalSongs.Text = $"{tracks.Count}+ (топ)";
-                ////TotalAlbums.Text = $"{albums.Count}+ (топ)";
-                ////TotalArtists.Text = $"{artists.Count}+ (топ)";
+                // Самые популярные
+                if (stats.MostPopularTrack != null)
+                {
+                    MostPopularSong.Text = $"{stats.MostPopularTrack.Title}";
+                    MostPopularSongArtist.Text = stats.MostPopularTrack.Artist;
+                }
+                else
+                {
+                    MostPopularSong.Text = "Нет данных";
+                }
 
-                //// Самые популярные
-                //var mostPopularTrack = tracks.FirstOrDefault();
-                //MostPopularSong.Text = mostPopularTrack != null
-                //    ? $"{mostPopularTrack.Title} — {mostPopularTrack.Artist}"
-                //    : "Нет данных";
+                if (stats.MostPopularAlbum != null)
+                {
+                    MostPopularAlbum.Text = stats.MostPopularAlbum.Title;
+                    MostPopularAlbumArtist.Text = stats.MostPopularAlbum.Artist;
+                }
+                else
+                {
+                    MostPopularAlbum.Text = "Нет данных";
+                }
 
-                //var mostPopularAlbum = albums.FirstOrDefault();
-                //MostPopularAlbum.Text = mostPopularAlbum != null
-                //    ? $"{mostPopularAlbum.Title} — {mostPopularAlbum.ArtistName}"
-                //    : "Нет данных";
+                if (stats.MostPopularArtist != null)
+                {
+                    MostPopularArtist.Text = stats.MostPopularArtist.Name;
+                }
+                else
+                {
+                    MostPopularArtist.Text = "Нет данных";
+                }
 
-                //var mostPopularArtist = artists.FirstOrDefault();
-                //MostPopularArtist.Text = mostPopularArtist?.Name ?? "Нет данных";
+                // Статистика по жанрам
+                DisplayGenreStats(stats.GenreStats);
             }
             catch (Exception ex)
             {
                 Debug.WriteLine($"API error: {ex.Message}");
-
-                //TotalSongs.Text = "Ошибка";
-                //TotalAlbums.Text = "Ошибка";
                 MostPopularSong.Text = "Ошибка загрузки";
                 MostPopularAlbum.Text = "Ошибка загрузки";
+                MostPopularArtist.Text = "Ошибка загрузки";
             }
         }
-        #endregion
 
-        private async void DateSelector_SelectedDateChanged(object sender, SelectionChangedEventArgs e)
+        private void DisplayGenreStats(Dictionary<string, long> genreStats)
         {
+            GenreStatsPanel.Children.Clear();
+
+            foreach (var (genre, count) in genreStats.Take(8))
+            {
+                var panel = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 5, 0, 0) };
+
+                panel.Children.Add(new TextBlock
+                {
+                    Text = genre,
+                    Width = 100,
+                    Style = (Style)Application.Current.TryFindResource("SmallInfoPanel")
+                });
+
+                panel.Children.Add(new TextBlock
+                {
+                    Text = FormatLargeNumber(count),
+                    Style = (Style)Application.Current.TryFindResource("SmallMainInfoPanel")
+                });
+
+                GenreStatsPanel.Children.Add(panel);
+            }
+        }
+
+        private string FormatLargeNumber(long number)
+        {
+            if (number >= 1_000_000)
+                return $"{number / 1_000_000.0:F1}M";
+            if (number >= 1_000)
+                return $"{number / 1_000.0:F1}K";
+            return number.ToString("N0");
+        }
+
+        private void ShowLoading(bool show)
+        {
+            LoadingIndicator.Visibility = show ? Visibility.Visible : Visibility.Collapsed;
+            ContentPanel.Visibility = show ? Visibility.Collapsed : Visibility.Visible;
+            TitleBorder.Visibility = show ? Visibility.Collapsed : Visibility.Visible;
+        }
+
+        private void ShowError(string message)
+        {
+            ErrorMessage.Text = message;
+            ErrorMessage.Visibility = Visibility.Visible;
         }
 
         private async void UpdateReportDataButton_Click(object sender, RoutedEventArgs e)

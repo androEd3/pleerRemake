@@ -6,6 +6,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using pleer.Models.Service;
+using System.Threading.Tasks;
 
 namespace pleer.Resources.Pages.Collections
 {
@@ -25,10 +26,10 @@ namespace pleer.Resources.Pages.Collections
             _listenerMain = main;
             _listener = listener;
 
-            LoadMediaLibrary();
+            Loaded += async (s, e) => await LoadMediaLibrary_Loaded();
         }
 
-        public void LoadMediaLibrary()
+        public async Task LoadMediaLibrary_Loaded()
         {
             MediaLibraryList.Children.Clear();
 
@@ -51,18 +52,17 @@ namespace pleer.Resources.Pages.Collections
                 }
             }
         }
-        public void CreatePlaylist()
+
+        public async Task CreatePlaylist()
         {
             if (_listener == null)
             {
                 MessageBox.Show("Зайдите в аккаунт чтобы воспользоваться данной функцией");
                 return;
             }
+            await ServiceMethods.AddPlaylistWithLink(_listener);
 
-            var listener = _context.Listeners.Find(_listener.Id);
-            ServiceMethods.AddPlaylistWithLink(listener);
-
-            LoadMediaLibrary();
+            await LoadMediaLibrary_Loaded();
         }
 
         public void AlbumCard_Click(object sender, MouseButtonEventArgs e)

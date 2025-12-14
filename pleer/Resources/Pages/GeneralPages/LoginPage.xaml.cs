@@ -56,7 +56,7 @@ namespace pleer.Resources.Pages.GeneralPages
             if (_context.Admins.Any())
             {
                 _admin = _context.Admins.First();
-                await OpenNewWindow(_admin);
+                //await OpenNewWindow(_admin);
             }
 
             CloseFullWindowFrameButton.Visibility = Visibility.Collapsed;
@@ -124,7 +124,7 @@ namespace pleer.Resources.Pages.GeneralPages
                     if (_listener != default && _listener.Status)
                     if (_listener.Status)
                     {
-                        ErrorNoticePanel.Text = "Ваш аккаунт был временно заблокирован, дождитесь разблокировки или обратитесь в поддержку (ее кстати нет))";
+                        ErrorNoticePanel.Text = "Ваш аккаунт был временно заблокирован, дождитесь его разблокировки";
                         return;
                     }
 
@@ -155,7 +155,7 @@ namespace pleer.Resources.Pages.GeneralPages
 
                     if (_admin != default)
                     {
-                        var passwordHash = ServiceMethods.GetSha256Hash(password);
+                        var passwordHash = ServiceMethods.GetSha256Hash(UserPassword.Text);
 
                         if (_admin.PasswordHash != passwordHash)
                         {

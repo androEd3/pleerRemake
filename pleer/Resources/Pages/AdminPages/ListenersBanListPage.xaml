@@ -15,11 +15,11 @@
         </Grid.RowDefinitions>
 
         <Border Style="{StaticResource NonFunctionalField22}">
-            <TextBlock Text="Список пользователей" Padding="10 5"
+            <TextBlock Text="Список пользователей" Padding="10"
                        Style="{StaticResource MainInfoPanel}"/>
         </Border>
 
-        <Grid Grid.Row="1" Margin="10 15" >
+        <Grid Grid.Row="1" Margin="15 25">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="auto"/>
                 <ColumnDefinition/>

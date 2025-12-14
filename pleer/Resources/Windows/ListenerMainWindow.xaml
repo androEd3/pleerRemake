@@ -115,16 +115,16 @@
 
                     <Frame Name="MediaLibrary" NavigationUIVisibility="Hidden"/>
 
-                    <Frame Grid.Column="1"
-                           Name="CenterField" NavigationUIVisibility="Hidden"
-                           Navigated="CenterField_Navigated"/>
+                    <ScrollViewer Grid.Column="1" Style="{StaticResource MinimalScrollViewer}">
+                        <Frame Name="CenterField" NavigationUIVisibility="Hidden"
+                               Navigated="CenterField_Navigated"/>
+                    </ScrollViewer>
 
                     <Frame Grid.Column="2"
                            Name="ListenedHistoryField" NavigationUIVisibility="Hidden"/>
                 </Grid>
 
-                <Border Grid.Row="2"
-                        Margin="5"
+                <Border Grid.Row="2" Margin="5"
                         Style="{StaticResource NonFunctionalField22}">
                     <Grid VerticalAlignment="Center">
                         <Grid.ColumnDefinitions>
@@ -134,7 +134,7 @@
                         </Grid.ColumnDefinitions>
 
                         <!-- Song Info -->
-                        <Grid Name="MetadataPanel" Margin="15 0"
+                        <Grid Name="MetadataGrid" Margin="15 0"
                                     VerticalAlignment="Center" HorizontalAlignment="Left">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="auto"/>
@@ -170,7 +170,7 @@
                                            Style="{StaticResource ArtistNameLowerPanel}"/>
                             </StackPanel>
 
-                            <Grid Name="AddButton"/>
+                            <Grid Grid.Column="2" Name="AddTrackButton"/>
                         </Grid>
 
                         <!-- Song Main Functions -->

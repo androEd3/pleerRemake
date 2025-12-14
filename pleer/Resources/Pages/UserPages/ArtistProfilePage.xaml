@@ -7,65 +7,62 @@
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         mc:Ignorable="d" >
 
-    <ScrollViewer VerticalScrollBarVisibility="Auto" Name="AlbumContent"
-                  Style="{StaticResource MinimalScrollViewer}">
-        <StackPanel>
-            <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center"
-                       Text="Выберите альбом" Name="InformationTextBlock" 
-                       Margin="0 35 0 0" Visibility="Collapsed"
-                       Style="{StaticResource SmallMainInfoPanel}"/>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        
+        <Border Style="{StaticResource NonFunctionalField22}"
+            Margin="0 0 5 5" Padding="5">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
 
-            <Border Style="{StaticResource NonFunctionalField22}"
-                    Margin="0 0 5 5" Padding="5">
                 <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition/>
-                        <RowDefinition/>
-                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="auto"/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
 
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="auto"/>
-                            <ColumnDefinition/>
-                        </Grid.ColumnDefinitions>
+                    <Grid Grid.Row="1"
+                      HorizontalAlignment="Left"
+                      Width="175" Height="175"
+                      Name="UserPictureGrid">
+                        <Ellipse>
+                            <Ellipse.Fill>
+                                <ImageBrush x:Name="UserPicture"
+                                        ImageSource="/Resources/ServiceImages/DefaultPicture.png"/>
+                            </Ellipse.Fill>
+                        </Ellipse>
+                    </Grid>
 
-                        <Grid Grid.Row="1"
-                              HorizontalAlignment="Left"
-                              Width="175" Height="175"
-                              Name="UserPictureGrid">
-                            <Ellipse>
-                                <Ellipse.Fill>
-                                    <ImageBrush x:Name="UserPicture"
-                                                ImageSource="/Resources/ServiceImages/DefaultPicture.png"/>
-                                </Ellipse.Fill>
-                            </Ellipse>
-                        </Grid>
+                    <Grid Grid.Column="1" Margin="15 5"
+                      Name="InfoTextBlockPanel" VerticalAlignment="Bottom">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" MinHeight="40"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
 
-                        <Grid Grid.Column="1" Margin="15 5"
-                              Name="InfoTextBlockPanel" VerticalAlignment="Bottom">
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto" MinHeight="40"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                            </Grid.RowDefinitions>
+                        <TextBlock Text="Исполнитель"
+                               HorizontalAlignment="Left" VerticalAlignment="Bottom"
+                               Style="{StaticResource SmallInfoPanel}"/>
 
-                            <TextBlock Text="Исполнитель"
-                                       HorizontalAlignment="Left" VerticalAlignment="Bottom"
-                                       Style="{StaticResource SmallInfoPanel}"/>
-
-                            <Viewbox Grid.Row="1" MaxHeight="80"
-                                     Stretch="Uniform" StretchDirection="Both"
-                                     HorizontalAlignment="Left" VerticalAlignment="Bottom">
-                                <TextBlock Name="ArtistName" TextWrapping="Wrap"
-                                           MaxWidth="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=Grid}}"
-                                           FontSize="20" Style="{StaticResource AlbumNameCenterPanel}"/>
-                            </Viewbox>
-                        </Grid>
+                        <Viewbox Grid.Row="1" MaxHeight="80"
+                             Stretch="Uniform" StretchDirection="Both"
+                             HorizontalAlignment="Left" VerticalAlignment="Bottom">
+                            <TextBlock Name="ArtistName" TextWrapping="Wrap"
+                                   MaxWidth="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=Grid}}"
+                                   FontSize="20" Style="{StaticResource AlbumNameCenterPanel}"/>
+                        </Viewbox>
                     </Grid>
                 </Grid>
-            </Border>
+            </Grid>
+        </Border>
 
-            <Frame Name="ArtistsContentField" NavigationUIVisibility="Hidden"/>
-        </StackPanel>
-    </ScrollViewer>
+        <Frame Grid.Row="1" Name="ArtistsContentField" NavigationUIVisibility="Hidden"/>
+    </Grid>
 </Page>

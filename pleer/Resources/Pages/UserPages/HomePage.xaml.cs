@@ -4,6 +4,7 @@ using pleer.Models.Users;
 using pleer.Resources.Windows;
 using System.Diagnostics;
 using System.Windows.Controls;
+using System.Windows;
 
 namespace pleer.Resources.Pages.UserPages
 {
@@ -94,6 +95,8 @@ namespace pleer.Resources.Pages.UserPages
 
                     PopularSongsControl.Children.Add(card);
                 }
+
+                TracksLoadProgressPanel.Visibility = Visibility.Collapsed;
             }
             catch (Exception ex)
             {
@@ -122,10 +125,11 @@ namespace pleer.Resources.Pages.UserPages
                     var card = UIElementsFactory.CreateAlbumCard(album, _listenerMain.AlbumCard_Click);
                     PopularAlbumsControl.Items.Add(card);
                 }
+
+                AlbumsLoadProgressPanel.Visibility = Visibility.Collapsed;
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Error loading albums: {ex.Message}");
                 UIElementsFactory.NoContent("Ошибка загрузки", NotFoundAlbumsPanel);
             }
         }
@@ -171,10 +175,11 @@ namespace pleer.Resources.Pages.UserPages
 
                     PopularSongsControl.Children.Add(card);
                 }
+
+                TracksLoadProgressPanel.Visibility = Visibility.Collapsed;
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Error loading artist tracks: {ex.Message}");
                 UIElementsFactory.NoContent("Ошибка загрузки", PopularSongsControl);
             }
         }
@@ -199,6 +204,8 @@ namespace pleer.Resources.Pages.UserPages
                     var card = UIElementsFactory.CreateAlbumCard(album, _listenerMain.AlbumCard_Click);
                     PopularAlbumsControl.Items.Add(card);
                 }
+
+                AlbumsLoadProgressPanel.Visibility = Visibility.Collapsed;
             }
             catch (Exception ex)
             {

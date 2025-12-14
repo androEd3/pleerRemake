@@ -23,7 +23,7 @@
                        HorizontalAlignment="Left" VerticalAlignment="Center" 
                        Style="{StaticResource SmallInfoPanel}"/>
             <Button Grid.Column="1" Margin="5 0"
-                    HorizontalAlignment="Right"
+                    HorizontalAlignment="Right" Cursor="Hand"
                     Click="CreatePlaylistButton_Click"
                     Style="{StaticResource BaseFunctionButton}">
                 <materialDesign:PackIcon Kind="Plus" Width="35" Height="35"/>

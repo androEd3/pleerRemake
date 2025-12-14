@@ -30,6 +30,7 @@ namespace pleer.Resources.Windows
         void LoadNonUserWindow()
         {
             InitializeData.CreateAdmin(_context);
+            //InitializeData.CreateListeners(_context);
             FullWindow.Navigate(new LoginPage(this));
         }
 

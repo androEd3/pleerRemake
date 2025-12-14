@@ -6,32 +6,37 @@
       xmlns:local="clr-namespace:pleer.Resources.Pages.UserPages"
       mc:Ignorable="d">
 
-    <ScrollViewer VerticalScrollBarVisibility="Auto"
-                  Style="{StaticResource MinimalScrollViewer}">
+    <StackPanel>
         <StackPanel>
-            <StackPanel>
-                <TextBlock Text="Популярные песни" 
-                           HorizontalAlignment="Left" Margin="5"
-                           Style="{StaticResource MainInfoPanel}"/>
+            <TextBlock Text="Популярные песни" 
+                   HorizontalAlignment="Left" Margin="5"
+                   Style="{StaticResource MainInfoPanel}"/>
 
-                <StackPanel Name="PopularSongsControl"/>
-            </StackPanel>
-
-            <StackPanel>
-                <TextBlock Text="Популярные релизы" 
-                           HorizontalAlignment="Left" Margin="5"
-                           Style="{StaticResource MainInfoPanel}"/>
-
-                <StackPanel Name="NotFoundAlbumsPanel"/>
-
-                <ItemsControl x:Name="PopularAlbumsControl">
-                    <ItemsControl.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <UniformGrid Columns="2" VerticalAlignment="Top"/>
-                        </ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
-                </ItemsControl>
-            </StackPanel>
+            <TextBlock Text="Загрузка..." Name="TracksLoadProgressPanel"
+                       HorizontalAlignment="Center" Margin="5"
+                       Style="{StaticResource SmallInfoPanel}"/>
+            
+            <StackPanel Name="PopularSongsControl"/>
         </StackPanel>
-    </ScrollViewer>
+
+        <StackPanel>
+            <TextBlock Text="Популярные релизы" 
+                   HorizontalAlignment="Left" Margin="5"
+                   Style="{StaticResource MainInfoPanel}"/>
+
+            <TextBlock Text="Загрузка..." Name="AlbumsLoadProgressPanel"
+                       HorizontalAlignment="Center" Margin="5"
+                       Style="{StaticResource SmallInfoPanel}"/>
+
+            <StackPanel Name="NotFoundAlbumsPanel"/>
+
+            <ItemsControl x:Name="PopularAlbumsControl">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <UniformGrid Columns="2" VerticalAlignment="Top"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+            </ItemsControl>
+        </StackPanel>
+    </StackPanel>
 </Page>

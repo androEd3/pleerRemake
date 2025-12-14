@@ -26,6 +26,7 @@ namespace pleer.Resources.Pages.Songs
         }
 
         SearchType _currentSearchType = SearchType.Tracks;
+        private CancellationTokenSource _searchCancellation;
 
         public SearchResultPage(
             ListenerMainWindow mainWindow,
@@ -39,24 +40,24 @@ namespace pleer.Resources.Pages.Songs
             _searchQuery = searchQuery;
             _musicService = _listenerMain._musicService;
 
-            Loaded += SearchResult_Loaded;
+            Loaded += async (sender, e) => await SearchResult_Loaded(sender, e);
         }
 
-        async void SearchResult_Loaded(object sender, RoutedEventArgs e)
+        async Task SearchResult_Loaded(object sender, RoutedEventArgs e)
         {
-            LoadGenres();
+            await LoadGenresAsync();
             await LoadTrackSearchResults();
         }
 
         #region Загрузка жанров
-        void LoadGenres()
+        async Task LoadGenresAsync()
         {
             try
             {
-                var genres = _musicService.GetAvailableGenres();
+                var genres = await _musicService.GetAvailableGenres();
 
                 var genresList = new List<string> { "Все жанры" };
-                genresList.AddRange(genres.Result.Select(CapitalizeFirst));
+                genresList.AddRange(genres.Select(CapitalizeFirst));
 
                 GenreComboBox.ItemsSource = genresList;
                 GenreComboBox.SelectedIndex = 0;
@@ -79,28 +80,35 @@ namespace pleer.Resources.Pages.Songs
         {
             _currentSearchType = SearchType.Tracks;
 
+            _searchCancellation?.Cancel();
+            _searchCancellation = new CancellationTokenSource();
+            var token = _searchCancellation.Token;
+
             try
             {
+                ShowLoading();
+
                 if (_musicService == null) return;
 
                 List<Track> tracks;
 
                 if (string.IsNullOrEmpty(_selectedGenre) || _selectedGenre == "Все жанры")
                 {
-                    // Обычный поиск
-                    var results = await _musicService.SearchAsync(_searchQuery, 50);
+                    var results = await _musicService.SearchAsync(_searchQuery, 20, token);
                     tracks = results.Tracks;
                 }
                 else
                 {
-                    var genreTracks = await _musicService.GetTracksByGenreAsync(_selectedGenre.ToLower(), 50);
+                    var genreTracks = await _musicService.GetTracksByGenreAsync(_selectedGenre.ToLower(), 20, token);
 
                     tracks = genreTracks
                         .Where(t =>
-                            t.Title.Contains(_searchQuery, StringComparison.OrdinalIgnoreCase) ||
-                            t.Artist.Contains(_searchQuery, StringComparison.OrdinalIgnoreCase))
+                            (t.Title?.Contains(_searchQuery, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                            (t.Artist?.Contains(_searchQuery, StringComparison.OrdinalIgnoreCase) ?? false))
                         .ToList();
                 }
+
+                if (token.IsCancellationRequested) return;
 
                 var searchResult = new SearchResult { Tracks = tracks };
                 DisplaySongsResults(searchResult);
@@ -108,6 +116,8 @@ namespace pleer.Resources.Pages.Songs
             catch (Exception ex)
             {
                 Debug.WriteLine($"Search error: {ex.Message}");
+                if (!token.IsCancellationRequested)
+                    ShowError($"Ошибка поиска: {ex.Message}");
             }
         }
 
@@ -115,43 +125,52 @@ namespace pleer.Resources.Pages.Songs
         {
             _currentSearchType = SearchType.Albums;
 
+            _searchCancellation?.Cancel();
+            _searchCancellation = new CancellationTokenSource();
+            var token = _searchCancellation.Token;
+
             try
             {
+                ShowLoading();
+
                 if (_musicService == null) return;
 
                 SearchResult results;
 
                 if (string.IsNullOrEmpty(_selectedGenre) || _selectedGenre == "Все жанры")
                 {
-                    results = await _musicService.SearchAsync(_searchQuery, 50);
+                    results = await _musicService.SearchAsync(_searchQuery, 20, token);
                 }
                 else
                 {
-                    var tracks = await _musicService.GetTracksByGenreAsync(_selectedGenre.ToLower(), 100);
+                    var tracks = await _musicService.GetTracksByGenreAsync(_selectedGenre.ToLower(), 30, token);
 
                     var albums = tracks
                         .Where(t => t.Album != null)
-                        .GroupBy(t => t.Album)
+                        .GroupBy(t => t.AlbumId ?? t.Album)
                         .Select(g => new Album
                         {
-                            Id = g.Key,
+                            Id = g.First().AlbumId ?? g.Key,
                             Title = g.First().Album,
                             Artist = g.First().Artist,
                             CoverUrl = g.First().CoverUrl
                         })
                         .Where(a =>
-                            a.Title.Contains(_searchQuery, StringComparison.OrdinalIgnoreCase) ||
-                            a.Artist.Contains(_searchQuery, StringComparison.OrdinalIgnoreCase))
+                            (a.Title?.Contains(_searchQuery, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                            (a.Artist?.Contains(_searchQuery, StringComparison.OrdinalIgnoreCase) ?? false))
                         .ToList();
 
                     results = new SearchResult { Albums = albums };
                 }
 
+                if (token.IsCancellationRequested) return;
+
                 DisplayAlbumsResults(results);
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Search error: {ex.Message}");
+                if (!token.IsCancellationRequested)
+                    ShowError($"Ошибка поиска: {ex.Message}");
             }
         }
 
@@ -159,60 +178,69 @@ namespace pleer.Resources.Pages.Songs
         {
             _currentSearchType = SearchType.Artists;
 
+            _searchCancellation?.Cancel();
+            _searchCancellation = new CancellationTokenSource();
+            var token = _searchCancellation.Token;
+
             try
             {
+                ShowLoading();
+
                 if (_musicService == null) return;
 
                 SearchResult results;
 
                 if (string.IsNullOrEmpty(_selectedGenre) || _selectedGenre == "Все жанры")
                 {
-                    results = await _musicService.SearchAsync(_searchQuery, 50);
+                    results = await _musicService.SearchAsync(_searchQuery, 20, token);
                 }
                 else
                 {
-                    var tracks = await _musicService.GetTracksByGenreAsync(_selectedGenre.ToLower(), 100);
+                    var tracks = await _musicService.GetTracksByGenreAsync(_selectedGenre.ToLower(), 30, token);
 
                     var artists = tracks
-                        .Where(t => t.Artist != null)
-                        .GroupBy(t => t.Artist)
+                        .Where(t => !string.IsNullOrWhiteSpace(t.Artist))
+                        .GroupBy(t => t.Artist.ToLower())
                         .Select(g => new Artist
                         {
-                            Name = g.First().Artist
+                            Name = g.First().Artist,
+                            ProfileImageUrl = g.First().CoverUrl
                         })
-                        .Where(a =>
-                            a.Name.Contains(_searchQuery, StringComparison.OrdinalIgnoreCase))
+                        .Where(a => a.Name.Contains(_searchQuery, StringComparison.OrdinalIgnoreCase))
+                        .Take(20)
                         .ToList();
 
-                    var fullArtists = new List<Artist>();
-                    foreach (var artist in artists.Take(20))
-                    {
-                        try
-                        {
-                            var fullArtist = await _musicService.GetArtistAsync(artist.Name);
-                            if (fullArtist != null)
-                                fullArtists.Add(fullArtist);
-                        }
-                        catch { }
-                    }
-
-                    results = new SearchResult { Artists = fullArtists };
+                    results = new SearchResult { Artists = artists };
                 }
+
+                if (token.IsCancellationRequested) return;
 
                 DisplayArtistsResults(results);
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Search error: {ex.Message}");
+                if (!token.IsCancellationRequested)
+                    ShowError($"Ошибка поиска: {ex.Message}");
             }
         }
         #endregion
 
         #region Отображение результатов
+        void ShowLoading()
+        {
+            ContentList.Children.Clear();
+            UIElementsFactory.NoContent("Загрузка...", ContentList);
+        }
+
+        void ShowError(string message)
+        {
+            ContentList.Children.Clear();
+            UIElementsFactory.NoContent(message, ContentList);
+        }
+
         void DisplaySongsResults(SearchResult results)
         {
             ContentList.Children.Clear();
-
             SetActiveButton(SearchSongsButton);
 
             if (results.Tracks.Any())
@@ -228,14 +256,16 @@ namespace pleer.Resources.Pages.Songs
             }
             else
             {
-                UIElementsFactory.NoContent("По запросу ничего не найдено", ContentList);
+                UIElementsFactory.NoContent(
+                    "По запросу ничего не найдено.\n" +
+                    "Попробуйте поиск на английском языке.",
+                    ContentList);
             }
         }
 
         void DisplayAlbumsResults(SearchResult results)
         {
             ContentList.Children.Clear();
-
             SetActiveButton(SearchPlaylistsButton);
 
             if (results.Albums.Any())
@@ -248,14 +278,16 @@ namespace pleer.Resources.Pages.Songs
             }
             else
             {
-                UIElementsFactory.NoContent("По запросу ничего не найдено", ContentList);
+                UIElementsFactory.NoContent(
+                    "По запросу ничего не найдено.\n" +
+                    "Попробуйте поиск на английском языке.",
+                    ContentList);
             }
         }
 
         void DisplayArtistsResults(SearchResult results)
         {
             ContentList.Children.Clear();
-
             SetActiveButton(SearchArtistsButton);
 
             if (results.Artists.Any())
@@ -268,7 +300,10 @@ namespace pleer.Resources.Pages.Songs
             }
             else
             {
-                UIElementsFactory.NoContent("По запросу ничего не найдено", ContentList);
+                UIElementsFactory.NoContent(
+                    "По запросу ничего не найдено.\n" +
+                    "Попробуйте поиск на английском языке.",
+                    ContentList);
             }
         }
 
@@ -326,11 +361,6 @@ namespace pleer.Resources.Pages.Songs
                     await LoadArtistsSearchResults();
                     break;
             }
-        }
-
-        private async void ClearGenreButton_Click(object sender, RoutedEventArgs e)
-        {
-            GenreComboBox.SelectedIndex = 0; // Все жанры
         }
         #endregion
     }

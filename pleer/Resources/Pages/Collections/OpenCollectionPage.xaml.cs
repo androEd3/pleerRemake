@@ -74,23 +74,22 @@ namespace pleer.Resources.Pages.Collections
                 AlbumName.Text = _album.Title ?? "Неизвестно";
                 ArtistName.Text = _album.Artist ?? "Неизвестен";
                 CollectionType.Text = "Альбом";
-                CreatonDate.Text = UIElementsFactory.FormatReleaseDate(_album.ReleaseDate);
+                CreatonDate.Text = "Дата выпуска: " + UIElementsFactory.FormatReleaseDate(_album.ReleaseDate);
 
                 LoadCoverFromUrl(_album.CoverUrl);
 
                 var tracks = await _musicService.GetAlbumTracksAsync(_album.Id);
-                var trackList = _album.Tracks.ToList();
 
-                if (trackList.Any())
+                if (tracks.Any())
                 {
-                    TracksCount.Text = $"Треков: {trackList.Count}";
-                    SummaryDuration.Text = " | Длительность: " + UIElementsFactory.FormatTotalDuration(trackList);
-                    DisplayTracks(trackList);
+                    TracksCount.Text = $"Треков: {tracks.Count}";
+                    SummaryDuration.Text = " | Длительность: " + UIElementsFactory.FormatTotalDuration(tracks);
+                    DisplayTracks(tracks);
                 }
                 else
                 {
                     TracksCount.Text = "Треков: 0";
-                    SummaryDuration.Text = "";
+                    SummaryDuration.Text = " | Длительность: --:--";
                 }
             }
             catch (Exception ex)
@@ -143,7 +142,7 @@ namespace pleer.Resources.Pages.Collections
                 AlbumName.Text = playlist.Title ?? "Неизвестно";
                 ArtistName.Text = _context.Listeners.Find(playlist.CreatorId)?.Name ?? "Неизвестен";
                 CollectionType.Text = "Плейлист";
-                CreatonDate.Text = playlist.CreatedAt.ToString("d MMM yyyy");
+                CreatonDate.Text = "Дата создания: " + playlist.CreatedAt.ToString("d MMM yyyy");
 
                 if (!string.IsNullOrEmpty(playlist.Description))
                 {
@@ -172,14 +171,10 @@ namespace pleer.Resources.Pages.Collections
         #region === ОТОБРАЖЕНИЕ ===
         void DisplayTracks(List<Track> tracks)
         {
-            Debug.WriteLine($"📋 Отображение {tracks.Count} треков");
-
             SongsList.Children.Clear();
 
             for (int i = 0; i < tracks.Count; i++)
             {
-                Debug.WriteLine($"  {i + 1}. {tracks[i].Title} - {tracks[i].Artist}");
-
                 Border card = _listener != null
                     ? UIElementsFactory.CreateTrackCard(tracks[i], _listener, i, _listenerMain.TrackCard_Click)
                     : UIElementsFactory.CreateTrackCard(tracks[i], i, _listenerMain.TrackCard_Click);
@@ -192,7 +187,10 @@ namespace pleer.Resources.Pages.Collections
                 SongsList.Children.Add(card);
             }
 
-            Debug.WriteLine($"✅ Добавлено карточек: {SongsList.Children.Count}");
+            if (!tracks.Any())
+                TracksLoadProgressPanel.Text = "Нет треков";
+            else
+                TracksLoadProgressPanel.Visibility = Visibility.Collapsed;
         }
 
         async Task<List<Track>> LoadPlaylistTracksAsync(List<string> trackIds)
@@ -221,7 +219,7 @@ namespace pleer.Resources.Pages.Collections
             {
                 var playlist = _context.Playlists.Find(_playlist.Id);
                 new PlaylistEditWindow(playlist).ShowDialog();
-                _collectionMain?.LoadMediaLibrary();
+                _collectionMain?.LoadMediaLibrary_Loaded();
             }
         }
 
@@ -249,7 +247,7 @@ namespace pleer.Resources.Pages.Collections
             _context.Playlists.Remove(playlist);
             _context.SaveChanges();
 
-            _collectionMain?.LoadMediaLibrary();
+            _collectionMain?.LoadMediaLibrary_Loaded();
             _listenerMain.CenterField.Navigate(new HomePage(_listenerMain, _listener));
         }
 

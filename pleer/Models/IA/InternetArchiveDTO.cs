@@ -11,8 +11,11 @@ public class IaSearchResponse
 
 public class IaResponse
 {
+    [JsonPropertyName("numFound")]
+    public long NumFound { get; set; } 
+
     [JsonPropertyName("docs")]
-    public List<IaDoc> Docs { get; set; } = new();
+    public List<IaDoc> Docs { get; set; }
 }
 
 public class IaDoc
