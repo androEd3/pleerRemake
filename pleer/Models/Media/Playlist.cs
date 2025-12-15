@@ -1,4 +1,5 @@
-﻿using pleer.Models.Users;
+﻿using pleer.Models.IA;
+using pleer.Models.Users;
 using System.ComponentModel.DataAnnotations;
 
 namespace pleer.Models.Media
@@ -24,7 +25,6 @@ namespace pleer.Models.Media
         public DateOnly CreatedAt { get; set; }
 
         public List<string> TracksId { get; set; } = [];
-        virtual public List<Track> Tracks { get; set; } = [];
 
         //навигация
         public virtual ICollection<ListenerPlaylistsLink> ListenerPlaylists { get; set; } = [];

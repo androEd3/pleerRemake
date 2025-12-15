@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:pleer.Resources.Windows"
             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
             mc:Ignorable="d" Background="#1e1e1e"
-            Height="450" Width="600"
+            Height="450" Width="600" Title="Изменение плейлиста"
             ResizeMode="CanMinimize" WindowStartupLocation="CenterScreen">
 
     <Grid>
@@ -55,7 +55,7 @@
                        Style="{StaticResource SmallMainInfoPanel}"/>
             <TextBox Name="AlbumTitle" Style="{StaticResource MainIngutField}"/>
 
-            <StackPanel Name="DescriptionPanel" Visibility="Collapsed">
+            <StackPanel Name="DescriptionPanel">
                 <TextBlock Grid.ColumnSpan="2" Margin="5 15 0 0"
                            Text="Описание"
                            Style="{StaticResource SmallMainInfoPanel}"/>

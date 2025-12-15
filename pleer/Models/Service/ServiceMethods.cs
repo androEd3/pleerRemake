@@ -176,461 +176,72 @@ namespace pleer.Models.Service
 
         public static void CreateListeners(DBContext context)
         {
-            var listeners = new List<Listener>
+            if (context.Listeners.Any())
+                return;
+
+            var favoritesCover = context.PlaylistCovers
+                .First(pc => pc.FilePath == GetFavoritesCoverPath());
+
+            var data = new (string Name, string Email, string Date)[]
             {
-                new Listener
-                {
-                    Name = "Михаил Смирнов",
-                    Email = "misha.smirnov@gmail.com",
-                    Status = false,
-                    ProfilePictureId = 1,
-                    PasswordHash = "ab12cd34ef56789012345678901234567890123456789012345678901234aaaa",
-                    CreatedAt = new DateOnly(2024, 1, 10)
-                },
-                new Listener
-                {
-                    Name = "Ольга Новикова",
-                    Email = "olga.novikova@yandex.ru",
-                    Status = false,
-                    ProfilePictureId = 1,
-                    PasswordHash = "bc23de45fg67890123456789012345678901234567890123456789012345bbbb",
-                    CreatedAt = new DateOnly(2024, 2, 14)
-                },
-                new Listener
-                {
-                    Name = "Артём Морозов",
-                    Email = "artem.moroz@mail.ru",
-                    Status = false,
-                    ProfilePictureId = 1,
-                    PasswordHash = "cd34ef56gh78901234567890123456789012345678901234567890123456cccc",
-                    CreatedAt = new DateOnly(2024, 3, 22)
-                },
-                new Listener
-                {
-                    Name = "Елена Соколова",
-                    Email = "elena.sok@outlook.com",
-                    Status = true,
-                    ProfilePictureId = 1,
-                    PasswordHash = "de45fg67hi89012345678901234567890123456789012345678901234567dddd",
-                    CreatedAt = new DateOnly(2024, 4, 8)
-                },
-                new Listener
-                {
-                    Name = "Никита Лебедев",
-                    Email = "nikita.lebedev@gmail.com",
-                    Status = false,
-                    ProfilePictureId = 1,
-                    PasswordHash = "ef56gh78ij90123456789012345678901234567890123456789012345678eeee",
-                    CreatedAt = new DateOnly(2024, 5, 30)
-                },
-                new Listener
-                {
-                    Name = "Дарья Кузнецова",
-                    Email = "dasha.kuz@proton.me",
-                    Status = false,
-                    ProfilePictureId = 1,
-                    PasswordHash = "fg67hi89jk01234567890123456789012345678901234567890123456789ffff",
-                    CreatedAt = new DateOnly(2024, 7, 12)
-                },
-                new Listener
-                {
-                    Name = "Сергей Попов",
-                    Email = "sergey.popov@yandex.ru",
-                    Status = true,
-                    ProfilePictureId = 1,
-                    PasswordHash = "gh78ij90kl12345678901234567890123456789012345678901234567890gggg",
-                    CreatedAt = new DateOnly(2024, 9, 5)
-                },
-                new Listener
-                {
-                    Name = "Анастасия Волкова",
-                    Email = "nastya.volkova@mail.ru",
-                    Status = false,
-                    ProfilePictureId = 1,
-                    PasswordHash = "hi89jk01lm23456789012345678901234567890123456789012345678901hhhh",
-                    CreatedAt = new DateOnly(2024, 11, 18)
-                },
-                new Listener
-                {
-                    Name = "Иван Федоров",
-                    Email = "ivan.fedorov@gmail.com",
-                    Status = false,
-                    ProfilePictureId = 1,
-                    PasswordHash = "ij90kl12mn34567890123456789012345678901234567890123456789012iiii",
-                    CreatedAt = new DateOnly(2025, 2, 25)
-                },
-                new Listener
-                {
-                    Name = "Алексей Козлов",
-                    Email = "alexey.kozlov@gmail.com",
-                    Status = false,
-                    ProfilePictureId = 1,
-                    PasswordHash = "jk01lm23no45678901234567890123456789012345678901234567890123jjjj",
-                    CreatedAt = new DateOnly(2024, 1, 5)
-                },
-                new Listener
-                {
-                    Name = "Мария Петрова",
-                    Email = "maria.petrova@yandex.ru",
-                    Status = false,
-                    ProfilePictureId = 1,
-                    PasswordHash = "kl12mn34op56789012345678901234567890123456789012345678901234kkkk",
-                    CreatedAt = new DateOnly(2024, 1, 18)
-                },
-                new Listener
-                {
-                    Name = "Дмитрий Васильев",
-                    Email = "dima.vasilev@mail.ru",
-                    Status = true,
-                    ProfilePictureId = 1,
-                    PasswordHash = "lm23no45pq67890123456789012345678901234567890123456789012345llll",
-                    CreatedAt = new DateOnly(2024, 2, 3)
-                },
-                new Listener
-                {
-                    Name = "Екатерина Михайлова",
-                    Email = "kate.mikhailova@outlook.com",
-                    Status = false,
-                    ProfilePictureId = 1,
-                    PasswordHash = "mn34op56qr78901234567890123456789012345678901234567890123456mmmm",
-                    CreatedAt = new DateOnly(2024, 2, 20)
-                },
-                new Listener
-                {
-                    Name = "Андрей Николаев",
-                    Email = "andrey.nikolaev@gmail.com",
-                    Status = false,
-                    ProfilePictureId = 1,
-                    PasswordHash = "no45pq67rs89012345678901234567890123456789012345678901234567nnnn",
-                    CreatedAt = new DateOnly(2024, 3, 1)
-                },
-                new Listener
-                {
-                    Name = "Татьяна Егорова",
-                    Email = "tanya.egorova@yandex.ru",
-                    Status = false,
-                    ProfilePictureId = 1,
-                    PasswordHash = "op56qr78st90123456789012345678901234567890123456789012345678oooo",
-                    CreatedAt = new DateOnly(2024, 3, 15)
-                },
-                new Listener
-                {
-                    Name = "Максим Белов",
-                    Email = "max.belov@proton.me",
-                    Status = false,
-                    ProfilePictureId = 1,
-                    PasswordHash = "pq67rs89tu01234567890123456789012345678901234567890123456789pppp",
-                    CreatedAt = new DateOnly(2024, 4, 2)
-                },
-                new Listener
-                {
-                    Name = "Юлия Орлова",
-                    Email = "julia.orlova@mail.ru",
-                    Status = true,
-                    ProfilePictureId = 1,
-                    PasswordHash = "qr78st90uv12345678901234567890123456789012345678901234567890qqqq",
-                    CreatedAt = new DateOnly(2024, 4, 19)
-                },
-                new Listener
-                {
-                    Name = "Павел Сидоров",
-                    Email = "pavel.sidorov@gmail.com",
-                    Status = false,
-                    ProfilePictureId = 1,
-                    PasswordHash = "rs89tu01vw23456789012345678901234567890123456789012345678901rrrr",
-                    CreatedAt = new DateOnly(2024, 5, 7)
-                },
-                new Listener
-                {
-                    Name = "Наталья Романова",
-                    Email = "natasha.romanova@outlook.com",
-                    Status = false,
-                    ProfilePictureId = 1,
-                    PasswordHash = "st90uv12wx34567890123456789012345678901234567890123456789012ssss",
-                    CreatedAt = new DateOnly(2024, 5, 22)
-                },
-                new Listener
-                {
-                    Name = "Владимир Крылов",
-                    Email = "vladimir.krylov@yandex.ru",
-                    Status = false,
-                    ProfilePictureId = 1,
-                    PasswordHash = "tu01vw23xy45678901234567890123456789012345678901234567890123tttt",
-                    CreatedAt = new DateOnly(2024, 6, 8)
-                },
-                new Listener
-                {
-                    Name = "Ксения Захарова",
-                    Email = "ksenia.zakharova@gmail.com",
-                    Status = false,
-                    ProfilePictureId = 1,
-                    PasswordHash = "uv12wx34yz56789012345678901234567890123456789012345678901234uuuu",
-                    CreatedAt = new DateOnly(2024, 6, 25)
-                },
-                new Listener
-                {
-                    Name = "Роман Медведев",
-                    Email = "roman.medvedev@mail.ru",
-                    Status = true,
-                    ProfilePictureId = 1,
-                    PasswordHash = "vw23xy45za67890123456789012345678901234567890123456789012345vvvv",
-                    CreatedAt = new DateOnly(2024, 7, 3)
-                },
-                new Listener
-                {
-                    Name = "Виктория Алексеева",
-                    Email = "vika.alexeeva@proton.me",
-                    Status = false,
-                    ProfilePictureId = 1,
-                    PasswordHash = "wx34yz56ab78901234567890123456789012345678901234567890123456wwww",
-                    CreatedAt = new DateOnly(2024, 7, 20)
-                },
-                new Listener
-                {
-                    Name = "Александр Титов",
-                    Email = "alex.titov@yandex.ru",
-                    Status = false,
-                    ProfilePictureId = 1,
-                    PasswordHash = "xy45za67bc89012345678901234567890123456789012345678901234567xxxx",
-                    CreatedAt = new DateOnly(2024, 8, 5)
-                },
-                new Listener
-                {
-                    Name = "Полина Григорьева",
-                    Email = "polina.grigorieva@gmail.com",
-                    Status = false,
-                    ProfilePictureId = 1,
-                    PasswordHash = "yz56ab78cd90123456789012345678901234567890123456789012345678yyyy",
-                    CreatedAt = new DateOnly(2024, 8, 18)
-                },
-                new Listener
-                {
-                    Name = "Кирилл Борисов",
-                    Email = "kirill.borisov@outlook.com",
-                    Status = false,
-                    ProfilePictureId = 1,
-                    PasswordHash = "za67bc89de01234567890123456789012345678901234567890123456789zzzz",
-                    CreatedAt = new DateOnly(2024, 9, 1)
-                },
-                new Listener
-                {
-                    Name = "Алина Ковалева",
-                    Email = "alina.kovaleva@mail.ru",
-                    Status = true,
-                    ProfilePictureId = 1,
-                    PasswordHash = "ab78cd90ef12345678901234567890123456789012345678901234567890aaab",
-                    CreatedAt = new DateOnly(2024, 9, 14)
-                },
-                new Listener
-                {
-                    Name = "Денис Соловьев",
-                    Email = "denis.soloviev@yandex.ru",
-                    Status = false,
-                    ProfilePictureId = 1,
-                    PasswordHash = "bc89de01fg23456789012345678901234567890123456789012345678901bbbc",
-                    CreatedAt = new DateOnly(2024, 9, 28)
-                },
-                new Listener
-                {
-                    Name = "Светлана Павлова",
-                    Email = "sveta.pavlova@gmail.com",
-                    Status = false,
-                    ProfilePictureId = 1,
-                    PasswordHash = "cd90ef12gh34567890123456789012345678901234567890123456789012cccd",
-                    CreatedAt = new DateOnly(2024, 10, 10)
-                },
-                new Listener
-                {
-                    Name = "Егор Семенов",
-                    Email = "egor.semenov@proton.me",
-                    Status = false,
-                    ProfilePictureId = 1,
-                    PasswordHash = "de01fg23hi45678901234567890123456789012345678901234567890123ddde",
-                    CreatedAt = new DateOnly(2024, 10, 22)
-                },
-                new Listener
-                {
-                    Name = "Вероника Степанова",
-                    Email = "veronika.stepanova@mail.ru",
-                    Status = false,
-                    ProfilePictureId = 1,
-                    PasswordHash = "ef12gh34ij56789012345678901234567890123456789012345678901234eeef",
-                    CreatedAt = new DateOnly(2024, 11, 3)
-                },
-                new Listener
-                {
-                    Name = "Глеб Филиппов",
-                    Email = "gleb.filippov@yandex.ru",
-                    Status = true,
-                    ProfilePictureId = 1,
-                    PasswordHash = "fg23hi45jk67890123456789012345678901234567890123456789012345fffg",
-                    CreatedAt = new DateOnly(2024, 11, 15)
-                },
-                new Listener
-                {
-                    Name = "Арина Тарасова",
-                    Email = "arina.tarasova@gmail.com",
-                    Status = false,
-                    ProfilePictureId = 1,
-                    PasswordHash = "gh34ij56kl78901234567890123456789012345678901234567890123456gggh",
-                    CreatedAt = new DateOnly(2024, 11, 28)
-                },
-                new Listener
-                {
-                    Name = "Тимур Гусев",
-                    Email = "timur.gusev@outlook.com",
-                    Status = false,
-                    ProfilePictureId = 1,
-                    PasswordHash = "hi45jk67lm89012345678901234567890123456789012345678901234567hhhi",
-                    CreatedAt = new DateOnly(2024, 12, 5)
-                },
-                new Listener
-                {
-                    Name = "Валерия Киселева",
-                    Email = "lera.kiseleva@mail.ru",
-                    Status = false,
-                    ProfilePictureId = 1,
-                    PasswordHash = "ij56kl78mn90123456789012345678901234567890123456789012345678iiij",
-                    CreatedAt = new DateOnly(2024, 12, 18)
-                },
-                new Listener
-                {
-                    Name = "Станислав Антонов",
-                    Email = "stas.antonov@yandex.ru",
-                    Status = false,
-                    ProfilePictureId = 1,
-                    PasswordHash = "jk67lm89no01234567890123456789012345678901234567890123456789jjjk",
-                    CreatedAt = new DateOnly(2024, 12, 30)
-                },
-                new Listener
-                {
-                    Name = "Диана Маркова",
-                    Email = "diana.markova@gmail.com",
-                    Status = true,
-                    ProfilePictureId = 1,
-                    PasswordHash = "kl78mn90op12345678901234567890123456789012345678901234567890kkkl",
-                    CreatedAt = new DateOnly(2025, 1, 8)
-                },
-                new Listener
-                {
-                    Name = "Олег Денисов",
-                    Email = "oleg.denisov@proton.me",
-                    Status = false,
-                    ProfilePictureId = 1,
-                    PasswordHash = "lm89no01pq23456789012345678901234567890123456789012345678901lllm",
-                    CreatedAt = new DateOnly(2025, 1, 20)
-                },
-                new Listener
-                {
-                    Name = "Кристина Власова",
-                    Email = "kristina.vlasova@mail.ru",
-                    Status = false,
-                    ProfilePictureId = 1,
-                    PasswordHash = "mn90op12qr34567890123456789012345678901234567890123456789012mmmn",
-                    CreatedAt = new DateOnly(2025, 2, 1)
-                },
-                new Listener
-                {
-                    Name = "Илья Комаров",
-                    Email = "ilya.komarov@yandex.ru",
-                    Status = false,
-                    ProfilePictureId = 1,
-                    PasswordHash = "no01pq23rs45678901234567890123456789012345678901234567890123nnno",
-                    CreatedAt = new DateOnly(2025, 2, 12)
-                },
-                new Listener
-                {
-                    Name = "Яна Воробьева",
-                    Email = "yana.vorobyeva@gmail.com",
-                    Status = false,
-                    ProfilePictureId = 1,
-                    PasswordHash = "op12qr34st56789012345678901234567890123456789012345678901234ooop",
-                    CreatedAt = new DateOnly(2025, 2, 28)
-                },
-                new Listener
-                {
-                    Name = "Вадим Пономарев",
-                    Email = "vadim.ponomarev@outlook.com",
-                    Status = true,
-                    ProfilePictureId = 1,
-                    PasswordHash = "pq23rs45tu67890123456789012345678901234567890123456789012345pppq",
-                    CreatedAt = new DateOnly(2025, 3, 10)
-                },
-                new Listener
-                {
-                    Name = "Милана Жукова",
-                    Email = "milana.zhukova@mail.ru",
-                    Status = false,
-                    ProfilePictureId = 1,
-                    PasswordHash = "qr34st56uv78901234567890123456789012345678901234567890123456qqqr",
-                    CreatedAt = new DateOnly(2025, 3, 22)
-                },
-                new Listener
-                {
-                    Name = "Георгий Ильин",
-                    Email = "georgiy.ilin@yandex.ru",
-                    Status = false,
-                    ProfilePictureId = 1,
-                    PasswordHash = "rs45tu67vw89012345678901234567890123456789012345678901234567rrrs",
-                    CreatedAt = new DateOnly(2025, 4, 3)
-                },
-                new Listener
-                {
-                    Name = "Софья Виноградова",
-                    Email = "sofia.vinogradova@gmail.com",
-                    Status = false,
-                    ProfilePictureId = 1,
-                    PasswordHash = "st56uv78wx90123456789012345678901234567890123456789012345678ssst",
-                    CreatedAt = new DateOnly(2025, 4, 15)
-                },
-                new Listener
-                {
-                    Name = "Матвей Громов",
-                    Email = "matvey.gromov@proton.me",
-                    Status = false,
-                    ProfilePictureId = 1,
-                    PasswordHash = "tu67vw89xy01234567890123456789012345678901234567890123456789tttu",
-                    CreatedAt = new DateOnly(2025, 4, 28)
-                },
-                new Listener
-                {
-                    Name = "Ева Лазарева",
-                    Email = "eva.lazareva@mail.ru",
-                    Status = true,
-                    ProfilePictureId = 1,
-                    PasswordHash = "uv78wx90yz12345678901234567890123456789012345678901234567890uuuv",
-                    CreatedAt = new DateOnly(2025, 5, 8)
-                },
-                new Listener
-                {
-                    Name = "Даниил Фролов",
-                    Email = "daniil.frolov@yandex.ru",
-                    Status = false,
-                    ProfilePictureId = 1,
-                    PasswordHash = "vw89xy01za23456789012345678901234567890123456789012345678901vvvw",
-                    CreatedAt = new DateOnly(2025, 5, 20)
-                },
-                new Listener
-                {
-                    Name = "Александра Зайцева",
-                    Email = "sasha.zaitseva@gmail.com",
-                    Status = false,
-                    ProfilePictureId = 1,
-                    PasswordHash = "wx90yz12ab34567890123456789012345678901234567890123456789012wwwx",
-                    CreatedAt = new DateOnly(2025, 6, 1)
-                },
-                new Listener
-                {
-                    Name = "Богдан Макаров",
-                    Email = "bogdan.makarov@outlook.com",
-                    Status = false,
-                    ProfilePictureId = 1,
-                    PasswordHash = "xy01za23bc45678901234567890123456789012345678901234567890123xxxy",
-                    CreatedAt = new DateOnly(2025, 6, 12)
-                }
+                ("Alex Chen", "alex.chen@gmail.com", "2024-01-05"),
+                ("Maria Santos", "maria.santos@outlook.com", "2024-01-12"),
+                ("Дмитрий К.", "dimka@yandex.ru", "2024-01-18"),
+                ("Emma Wilson", "emma.w@gmail.com", "2024-02-03"),
+                ("藤田健太", "kenta.fujita@mail.jp", "2024-02-14"),
+                ("Олег", "oleg.music@mail.ru", "2024-02-22"),
+                ("Sophie Martin", "sophie.m@yahoo.fr", "2024-03-01"),
+                ("Анна Б.", "anna.b@gmail.com", "2024-03-10"),
+                ("Jake Thompson", "jake.t@hotmail.com", "2024-03-15"),
+                ("김민수", "minsu.kim@naver.com", "2024-03-28"),
+                ("Lucas", "lucas.beats@gmail.com", "2024-04-02"),
+                ("Ира", "ira.melody@yandex.ru", "2024-04-11"),
+                ("Mohammed Ali", "m.ali@outlook.com", "2024-04-19"),
+                ("Nina Petrova", "nina.p@mail.ru", "2024-05-03"),
+                ("Tom", "tom.music@gmail.com", "2024-05-14"),
+                ("Yuki", "yuki.sound@gmail.com", "2024-05-22"),
+                ("Макс", "max.tune@yandex.ru", "2024-06-01"),
+                ("Clara", "clara.vibes@outlook.de", "2024-06-15"),
+                ("Рома", "roma.play@mail.ru", "2024-06-28"),
+                ("Zoe", "zoe.audio@gmail.com", "2024-07-04")
             };
 
+            var listeners = data.Select((d, i) => new Listener
+            {
+                Name = d.Name,
+                Email = d.Email,
+                Status = false,
+                ProfilePictureId = 1,
+                PasswordHash = ServiceMethods.GetSha256Hash($"testpass{i + 1}"),
+                CreatedAt = DateOnly.Parse(d.Date)
+            }).ToList();
+
             context.Listeners.AddRange(listeners);
+            context.SaveChanges();
+
+            // Создаём плейлисты и связи для каждого слушателя
+            foreach (var listener in listeners)
+            {
+                var playlist = new Playlist
+                {
+                    Title = "Избранное",
+                    CreatedAt = DateOnly.FromDateTime(DateTime.Now),
+                    CoverId = favoritesCover.Id,
+                    CreatorId = listener.Id
+                };
+
+                context.Playlists.Add(playlist);
+                context.SaveChanges();
+
+                var link = new ListenerPlaylistsLink
+                {
+                    ListenerId = listener.Id,
+                    PlaylistId = playlist.Id
+                };
+
+                context.ListenerPlaylistsLinks.Add(link);
+            }
+
             context.SaveChanges();
         }
 

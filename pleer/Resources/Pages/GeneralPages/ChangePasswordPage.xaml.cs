@@ -36,15 +36,15 @@ namespace pleer.Resources.Pages.GeneralPages
 
         private async void SaveUserDataButton_Click(object sender, RoutedEventArgs e)
         {
-            string oldPassword = ServiceMethods.IsPasswordsValidOutput(OldUserPassword.Text);
-            if (oldPassword != OldUserPassword.Text)
+            string oldPassword = ServiceMethods.IsPasswordsValidOutput(OldUserPassword.Password);
+            if (oldPassword != OldUserPassword.Password)
             {
                 ErrorNoticePanel.Style = Application.Current.TryFindResource("SmallErrorPanel") as Style;
                 ErrorNoticePanel.Text = oldPassword;
                 return;
             }
 
-            var isPasswordsSame = ServiceMethods.IsPasswordsSame(NewUserPassword.Text, RepeatedNewUserPassword.Text);
+            var isPasswordsSame = ServiceMethods.IsPasswordsSame(NewUserPassword.Password, RepeatedNewUserPassword.Password);
             if (!isPasswordsSame)
             {
                 ErrorNoticePanel.Style = Application.Current.TryFindResource("SmallErrorPanel") as Style;
@@ -52,8 +52,8 @@ namespace pleer.Resources.Pages.GeneralPages
                 return;
             }
 
-            string newPassword = ServiceMethods.IsPasswordsValidOutput(NewUserPassword.Text);
-            if (newPassword != NewUserPassword.Text)
+            string newPassword = ServiceMethods.IsPasswordsValidOutput(NewUserPassword.Password);
+            if (newPassword != NewUserPassword.Password)
             {
                 ErrorNoticePanel.Style = Application.Current.TryFindResource("SmallErrorPanel") as Style;
                 ErrorNoticePanel.Text = newPassword;
@@ -95,6 +95,118 @@ namespace pleer.Resources.Pages.GeneralPages
                                 MessageBoxButton.OK, MessageBoxImage.Information);
 
             _listenerMain.FullWindow.Navigate(new ProfilePage(_listenerMain, _listener));
+        }
+
+        private bool isUpdating = false;
+        private void OldUserPassword_PasswordChanged(object sender, RoutedEventArgs e)
+        {
+            if (!isUpdating)
+            {
+                isUpdating = true;
+                OldUserPasswordVisible.Text = OldUserPassword.Password;
+                isUpdating = false;
+            }
+        }
+
+        private void OldUserPasswordVisible_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (!isUpdating)
+            {
+                isUpdating = true;
+                OldUserPassword.Password = OldUserPasswordVisible.Text;
+                isUpdating = false;
+            }
+        }
+
+        private void ToggleOldPasswordVisibility(object sender, MouseButtonEventArgs e)
+        {
+            if (OldUserPassword.Visibility == Visibility.Visible)
+            {
+                OldUserPassword.Visibility = Visibility.Collapsed;
+                OldUserPasswordVisible.Visibility = Visibility.Visible;
+                OldUserPasswordVisible.Focus();
+                OldUserPasswordVisible.CaretIndex = OldUserPasswordVisible.Text.Length;
+            }
+            else
+            {
+                OldUserPassword.Visibility = Visibility.Visible;
+                OldUserPasswordVisible.Visibility = Visibility.Collapsed;
+                OldUserPassword.Focus();
+            }
+        }
+
+        private void NewUserPassword_PasswordChanged(object sender, RoutedEventArgs e)
+        {
+            if (!isUpdating)
+            {
+                isUpdating = true;
+                NewUserPasswordVisible.Text = NewUserPassword.Password;
+                isUpdating = false;
+            }
+        }
+
+        private void NewUserPasswordVisible_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (!isUpdating)
+            {
+                isUpdating = true;
+                NewUserPassword.Password = NewUserPasswordVisible.Text;
+                isUpdating = false;
+            }
+        }
+
+        private void ToggleNewPasswordVisibility(object sender, MouseButtonEventArgs e)
+        {
+            if (NewUserPassword.Visibility == Visibility.Visible)
+            {
+                NewUserPassword.Visibility = Visibility.Collapsed;
+                NewUserPasswordVisible.Visibility = Visibility.Visible;
+                NewUserPasswordVisible.Focus();
+                NewUserPasswordVisible.CaretIndex = NewUserPasswordVisible.Text.Length;
+            }
+            else
+            {
+                NewUserPassword.Visibility = Visibility.Visible;
+                NewUserPasswordVisible.Visibility = Visibility.Collapsed;
+                NewUserPassword.Focus();
+            }
+        }
+
+        private void RepeatedNewUserPassword_PasswordChanged(object sender, RoutedEventArgs e)
+        {
+            if (!isUpdating)
+            {
+                isUpdating = true;
+                RepeatedNewUserPasswordVisible.Text = RepeatedNewUserPassword.Password;
+                isUpdating = false;
+            }
+        }
+
+        private void RepeatedNewUserPasswordVisible_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (!isUpdating)
+            {
+                isUpdating = true;
+                RepeatedNewUserPassword.Password = RepeatedNewUserPasswordVisible.Text;
+                isUpdating = false;
+            }
+        }
+
+        private void ToggleRepeatedNewPasswordVisibility(object sender, MouseButtonEventArgs e)
+        {
+            if (RepeatedNewUserPassword.Visibility == Visibility.Visible)
+            {
+                RepeatedNewUserPassword.Visibility = Visibility.Collapsed;
+                RepeatedNewUserPasswordVisible.Visibility = Visibility.Visible;
+                RepeatedNewUserPasswordVisible.Focus();
+                RepeatedNewUserPasswordVisible.CaretIndex = RepeatedNewUserPasswordVisible.Text.Length;
+            }
+            else
+            {
+                RepeatedNewUserPassword.Visibility = Visibility.Visible;
+                RepeatedNewUserPasswordVisible.Visibility = Visibility.Collapsed;
+                RepeatedNewUserPassword.Focus();
+            }
         }
 
         private void TurnToLogin_Click(object sender, MouseButtonEventArgs e)

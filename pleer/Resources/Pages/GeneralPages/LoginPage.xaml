@@ -41,8 +41,21 @@
 
                     <TextBlock Text="Пароль" Margin="5 20 5 0"
                                Style="{StaticResource SmallInfoPanel}"/>
-                    <TextBox Name="UserPassword"
-                             Style="{StaticResource MainIngutField}"/>
+                    <Grid>
+                        <PasswordBox Name="UserPassword" 
+                                     PasswordChanged="UserPassword_PasswordChanged"
+                                     Style="{StaticResource MainPasswordField}" />
+                        <TextBox Name="UserPasswordVisible"
+                                 Style="{StaticResource MainIngutField}"
+                                 Visibility="Collapsed"
+                                 TextChanged="UserPasswordVisible_TextChanged"/>
+                        <Button Content="👁" Margin="0 0 10 0" FontSize="20"
+                                HorizontalAlignment="Right" VerticalAlignment="Center" 
+                                Background="Transparent" BorderThickness="0" Cursor="Hand"
+                                PreviewMouseDown="TogglePasswordVisibility"
+                                PreviewMouseUp="TogglePasswordVisibility"
+                                Style="{StaticResource BaseFunctionButton}"/>
+                    </Grid>
                 </StackPanel>
 
                 <StackPanel Grid.Row="2" Grid.ColumnSpan="2">

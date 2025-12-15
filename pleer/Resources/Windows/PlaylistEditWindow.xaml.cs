@@ -27,8 +27,6 @@ namespace pleer.Resources.Windows
 
             CoverMouseEvents();
             LoadPlaylistData();
-
-            DescriptionPanel.Visibility = Visibility.Visible;
         }
 
         void CoverMouseEvents()

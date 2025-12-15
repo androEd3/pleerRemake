@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:pleer.Resources.Windows"
             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-            mc:Ignorable="d" WindowStartupLocation="CenterScreen"
+            mc:Ignorable="d" WindowStartupLocation="CenterScreen" Title="pleer (Музыкальный сервис)"
             Style="{StaticResource MainWindow}" Closing="Window_Closing">
 
     <Grid>

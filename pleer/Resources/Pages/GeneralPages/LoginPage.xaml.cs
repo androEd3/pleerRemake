@@ -105,8 +105,8 @@ namespace pleer.Resources.Pages.GeneralPages
                 }
                 else ErrorNoticePanel.Text = string.Empty;
 
-                password = ServiceMethods.IsPasswordsValidOutput(UserPassword.Text);
-                if (password != UserPassword.Text)
+                password = ServiceMethods.IsPasswordsValidOutput(UserPassword.Password);
+                if (password != UserPassword.Password)
                 {
                     ErrorNoticePanel.Text = password;
                     return;
@@ -155,7 +155,7 @@ namespace pleer.Resources.Pages.GeneralPages
 
                     if (_admin != default)
                     {
-                        var passwordHash = ServiceMethods.GetSha256Hash(UserPassword.Text);
+                        var passwordHash = ServiceMethods.GetSha256Hash(UserPassword.Password);
 
                         if (_admin.PasswordHash != passwordHash)
                         {
@@ -202,10 +202,45 @@ namespace pleer.Resources.Pages.GeneralPages
             }), DispatcherPriority.Background);
         }
 
+        private bool isUpdating = false;
+        private void UserPassword_PasswordChanged(object sender, RoutedEventArgs e)
+        {
+            if (!isUpdating)
+            {
+                isUpdating = true;
+                UserPasswordVisible.Text = UserPassword.Password;
+                isUpdating = false;
+            }
+        }
+
+        private void UserPasswordVisible_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (!isUpdating)
+            {
+                isUpdating = true;
+                UserPassword.Password = UserPasswordVisible.Text;
+                isUpdating = false;
+            }
+        }
+
+        private void TogglePasswordVisibility(object sender, MouseButtonEventArgs e)
+        {
+            if (UserPassword.Visibility == Visibility.Visible)
+            {
+                UserPassword.Visibility = Visibility.Collapsed;
+                UserPasswordVisible.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                UserPassword.Visibility = Visibility.Visible;
+                UserPasswordVisible.Visibility = Visibility.Collapsed;
+            }
+        }
+
         bool CheckUserDataValid()
         {
             if (string.IsNullOrEmpty(UserEmail.Text) ||
-                string.IsNullOrEmpty(UserPassword.Text))
+                string.IsNullOrEmpty(UserPassword.Password))
             {
                 ErrorNoticePanel.Text = "Заполните все необходимые поля";
                 return false;

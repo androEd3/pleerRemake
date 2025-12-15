@@ -112,6 +112,18 @@
             <Setter Property="BorderThickness" Value="2"/>
         </Style>
 
+        <Style x:Key="MainPasswordField" TargetType="PasswordBox">
+            <Setter Property="FontSize" Value="18"/>
+            <Setter Property="Foreground" Value="#eee"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Padding" Value="5"/>
+            <Setter Property="CaretBrush" Value="#569DE5"/>
+
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderBrush" Value="#bbb"/>
+            <Setter Property="BorderThickness" Value="2"/>
+        </Style>
+
         <!-- Button Styles -->
         <Style x:Key="MenuButton" TargetType="Button">
             <Setter Property="Background" Value="Transparent"/>

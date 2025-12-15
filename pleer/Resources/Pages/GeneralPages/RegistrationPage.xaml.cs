@@ -54,21 +54,21 @@ namespace pleer.Resources.Pages.GeneralPages
                         return;
                     }
 
-                    var isPasswordSame = ServiceMethods.IsPasswordsSame(UserPassword.Text, RepeatedUserPassword.Text);
+                    var isPasswordSame = ServiceMethods.IsPasswordsSame(UserPassword.Password, RepeatedUserPassword.Password);
                     if (!isPasswordSame)
                     {
                         ErrorNoticePanel.Text = "Пароли не совпадают";
                         return;
                     }
 
-                    var isPasswordValid = ServiceMethods.IsPasswordsValidOutput(UserPassword.Text);
-                    if (isPasswordValid != UserPassword.Text)
+                    var isPasswordValid = ServiceMethods.IsPasswordsValidOutput(UserPassword.Password);
+                    if (isPasswordValid != UserPassword.Password)
                     {
                         ErrorNoticePanel.Text = isPasswordValid;
                         return;
                     }
 
-                    var passwordHash = ServiceMethods.GetSha256Hash(UserPassword.Text);
+                    var passwordHash = ServiceMethods.GetSha256Hash(UserPassword.Password);
 
                     var profilePicture = _context.ProfilePictures
                         .FirstOrDefault(pp => pp.FilePath == InitializeData.GetDefaultProfilePicturePath());
@@ -99,11 +99,83 @@ namespace pleer.Resources.Pages.GeneralPages
             }
         }
 
+        private bool isUpdating = false;
+
+        // Первый пароль
+        private void UserPassword_PasswordChanged(object sender, RoutedEventArgs e)
+        {
+            if (!isUpdating)
+            {
+                isUpdating = true;
+                UserPasswordVisible.Text = UserPassword.Password;
+                isUpdating = false;
+            }
+        }
+
+        private void UserPasswordVisible_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (!isUpdating)
+            {
+                isUpdating = true;
+                UserPassword.Password = UserPasswordVisible.Text;
+                isUpdating = false;
+            }
+        }
+
+        private void TogglePasswordVisibility(object sender, MouseButtonEventArgs e)
+        {
+            if (UserPassword.Visibility == Visibility.Visible)
+            {
+                UserPassword.Visibility = Visibility.Collapsed;
+                UserPasswordVisible.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                UserPassword.Visibility = Visibility.Visible;
+                UserPasswordVisible.Visibility = Visibility.Collapsed;
+            }
+        }
+
+        // Повторный пароль
+        private void RepeatedUserPassword_PasswordChanged(object sender, RoutedEventArgs e)
+        {
+            if (!isUpdating)
+            {
+                isUpdating = true;
+                RepeatedUserPasswordVisible.Text = RepeatedUserPassword.Password;
+                isUpdating = false;
+            }
+        }
+
+        private void RepeatedUserPasswordVisible_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (!isUpdating)
+            {
+                isUpdating = true;
+                RepeatedUserPassword.Password = RepeatedUserPasswordVisible.Text;
+                isUpdating = false;
+            }
+        }
+
+        private void ToggleRepeatedPasswordVisibility(object sender, MouseButtonEventArgs e)
+        {
+            if (RepeatedUserPassword.Visibility == Visibility.Visible)
+            {
+                RepeatedUserPassword.Visibility = Visibility.Collapsed;
+                RepeatedUserPasswordVisible.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                RepeatedUserPassword.Visibility = Visibility.Visible;
+                RepeatedUserPasswordVisible.Visibility = Visibility.Collapsed;
+            }
+        }
+
         bool CheckUserDataValid()
         {
             if (string.IsNullOrEmpty(UserEmail.Text) ||
-                string.IsNullOrEmpty(UserPassword.Text) ||
-                string.IsNullOrEmpty(RepeatedUserPassword.Text) ||
+                string.IsNullOrEmpty(UserPassword.Password) ||
+                string.IsNullOrEmpty(RepeatedUserPassword.Password) ||
                 string.IsNullOrEmpty(UserName.Text))
             {
                 ErrorNoticePanel.Text = "Заполните все необходимые поля";

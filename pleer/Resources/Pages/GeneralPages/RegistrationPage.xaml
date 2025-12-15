@@ -66,17 +66,42 @@
                 <StackPanel Grid.Row="1" Grid.ColumnSpan="2" Name="PasswordPanel"
                             Margin="0 5" Orientation="Horizontal"
                             Visibility="Collapsed">
-                    
+
                     <StackPanel Width="285" Margin="0 30 10 0">
                         <TextBlock Text="Пароль" Margin="5 0"
                                    Style="{StaticResource SmallInfoPanel}"/>
-                        <TextBox Name="UserPassword"
-                                 Style="{StaticResource MainIngutField}"/>
+                        <Grid>
+                            <PasswordBox Name="UserPassword"
+                                         PasswordChanged="UserPassword_PasswordChanged"
+                                         Style="{StaticResource MainPasswordField}"/>
+                            <TextBox Name="UserPasswordVisible" Visibility="Collapsed"
+                                     TextChanged="UserPasswordVisible_TextChanged"
+                                     Style="{StaticResource MainIngutField}"/>
+                            <Button Content="👁" Margin="0 0 10 0" FontSize="20"
+                                    HorizontalAlignment="Right" VerticalAlignment="Center" 
+                                    Background="Transparent" BorderThickness="0" Cursor="Hand"
+                                    PreviewMouseDown="TogglePasswordVisibility"
+                                    PreviewMouseUp="TogglePasswordVisibility"
+                                    Style="{StaticResource BaseFunctionButton}"/>
+                        </Grid>
 
                         <TextBlock Text="Повторный пароль" Margin="5 20 5 0"
                                    Style="{StaticResource SmallInfoPanel}"/>
-                        <TextBox Name="RepeatedUserPassword"
-                                 Style="{StaticResource MainIngutField}"/>
+                        <Grid>
+                            <PasswordBox Name="RepeatedUserPassword" 
+                                         PasswordChanged="RepeatedUserPassword_PasswordChanged"
+                                         Style="{StaticResource MainPasswordField}" />
+                            <TextBox Name="RepeatedUserPasswordVisible"
+                                     Style="{StaticResource MainIngutField}"
+                                     Visibility="Collapsed"
+                                     TextChanged="RepeatedUserPasswordVisible_TextChanged"/>
+                            <Button Content="👁" Margin="0 0 10 0" FontSize="20"
+                                    HorizontalAlignment="Right" VerticalAlignment="Center" 
+                                    Background="Transparent" BorderThickness="0" Cursor="Hand"
+                                    PreviewMouseDown="ToggleRepeatedPasswordVisibility"
+                                    PreviewMouseUp="ToggleRepeatedPasswordVisibility"
+                                    Style="{StaticResource BaseFunctionButton}"/>
+                        </Grid>
                     </StackPanel>
 
                     <TextBlock MouseLeftButtonUp="TurnToEmail_Click"

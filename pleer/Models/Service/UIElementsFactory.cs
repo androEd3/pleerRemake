@@ -18,7 +18,7 @@ namespace pleer.Models.Service
     {
         #region Track Cards
         public static Border CreateTrackCard(
-            Media.Track track,
+            IA.Track track,
             Action<object, MouseButtonEventArgs> clickHandler,
             CardSize cardSize = CardSize.Small)
         {
@@ -39,7 +39,7 @@ namespace pleer.Models.Service
         }
 
         public static Border CreateTrackCard(
-            Media.Track track,
+            IA.Track track,
             int index,
             Action<object, MouseButtonEventArgs> clickHandler,
             CardSize cardSize = CardSize.Small)
@@ -72,7 +72,7 @@ namespace pleer.Models.Service
         }
 
         public static Border CreateTrackCard(
-            Media.Track track,
+            IA.Track track,
             Listener listener,
             int index,
             Action<object, MouseButtonEventArgs> clickHandler,
@@ -116,7 +116,7 @@ namespace pleer.Models.Service
             return border;
         }
 
-        static Grid TrackGrid(Media.Track track, CardSettings settings)
+        static Grid TrackGrid(IA.Track track, CardSettings settings)
         {
             var grid = new Grid
             {
@@ -157,7 +157,7 @@ namespace pleer.Models.Service
         #region Add Song Button
         public static Grid CreateAddSongButton(
             Listener Listener,
-            Media.Track Track,
+            IA.Track Track,
             PlacementMode Placement = PlacementMode.Bottom,
             Visibility Visibility = Visibility.Collapsed)
         {
@@ -239,7 +239,7 @@ namespace pleer.Models.Service
             return grid;
         }
 
-        static void RefreshPlaylistsPanel(StackPanel playlistsPanel, Listener listener, Media.Track track)
+        static void RefreshPlaylistsPanel(StackPanel playlistsPanel, Listener listener, IA.Track track)
         {
             playlistsPanel.Children.Clear();
 
@@ -845,7 +845,7 @@ namespace pleer.Models.Service
             return dateString ?? "";
         }
 
-        public static string FormatTotalDuration(List<Media.Track> tracks)
+        public static string FormatTotalDuration(List<IA.Track> tracks)
         {
             var total = tracks
                 .Select(t => t.Duration ?? TimeSpan.Zero)

@@ -93,48 +93,6 @@ namespace pleer.Migrations
                     b.ToTable("PlaylistCovers");
                 });
 
-            modelBuilder.Entity("pleer.Models.Media.Track", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("Album")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Artist")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("CoverUrl")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<TimeSpan?>("Duration")
-                        .HasColumnType("time");
-
-                    b.Property<string>("Genre")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("PlaylistId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("StreamUrl")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PlaylistId");
-
-                    b.ToTable("Track");
-                });
-
             modelBuilder.Entity("pleer.Models.Users.Admin", b =>
                 {
                     b.Property<int>("Id")
@@ -250,13 +208,6 @@ namespace pleer.Migrations
                     b.Navigation("Creator");
                 });
 
-            modelBuilder.Entity("pleer.Models.Media.Track", b =>
-                {
-                    b.HasOne("pleer.Models.Media.Playlist", null)
-                        .WithMany("Tracks")
-                        .HasForeignKey("PlaylistId");
-                });
-
             modelBuilder.Entity("pleer.Models.Users.Listener", b =>
                 {
                     b.HasOne("pleer.Models.Users.ProfilePicture", "ProfilePicture")
@@ -271,8 +222,6 @@ namespace pleer.Migrations
             modelBuilder.Entity("pleer.Models.Media.Playlist", b =>
                 {
                     b.Navigation("ListenerPlaylists");
-
-                    b.Navigation("Tracks");
                 });
 
             modelBuilder.Entity("pleer.Models.Users.Listener", b =>
